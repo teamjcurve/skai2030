@@ -17,7 +17,7 @@ export default function Main({
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-snug">
             2030 AI 시대
             <br />
-            <span className="text-indigo-400">생존 밸런스 게임</span>
+            <span className="text-indigo-400">역량 밸런스 게임</span>
           </h1>
           <p className="text-slate-400 text-base sm:text-lg leading-relaxed mt-2">
             AI가 모든 것을 바꾸는 2030년,
