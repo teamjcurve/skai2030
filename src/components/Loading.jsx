@@ -1,19 +1,19 @@
 export default function Loading() {
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white px-6">
-      <div className="flex flex-col items-center gap-8">
-        <div className="relative w-20 h-20">
-          <div className="absolute inset-0 rounded-full border-4 border-slate-700" />
-          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-indigo-500 animate-spin" />
-          <div className="absolute inset-3 rounded-full border-4 border-transparent border-t-violet-400 animate-spin [animation-direction:reverse] [animation-duration:0.8s]" />
+    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#f6f7f9] px-6">
+      <div className="w-full max-w-md rounded-3xl bg-white border border-black/5 shadow-sm p-6 flex flex-col items-center gap-6">
+        <div className="relative w-14 h-14">
+          <div className="absolute inset-0 rounded-full border-4 border-black/10" />
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[color:var(--key-primary)] animate-spin" />
+          <div className="absolute inset-3 rounded-full border-4 border-transparent border-t-[color:var(--key-highlight)] animate-spin [animation-direction:reverse] [animation-duration:0.9s]" />
         </div>
 
-        <div className="text-center flex flex-col gap-2">
-          <p className="text-lg font-bold text-slate-100">
-            나의 생존 캐릭터를 분석 중입니다
+        <div className="text-center flex flex-col gap-1.5">
+          <p className="text-lg font-bold text-slate-900">
+            스킬 캐릭터를 분석 중입니다
           </p>
-          <p className="text-sm text-slate-400 animate-pulse">
-            잠시만 기다려주세요...
+          <p className="text-base text-slate-500">
+            잠시만 기다려 주세요
           </p>
         </div>
       </div>

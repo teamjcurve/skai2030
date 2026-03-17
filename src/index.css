@@ -1,7 +1,69 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Pretendard', system-ui, -apple-system, sans-serif;
+  --font-sans: 'NanumSquare', system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  /* SK palette (from CMYK) */
+  --sk-red: #F5002F;    /* (0,100,81,4) */
+  --sk-orange: #FF5708; /* (0,66,97,0) */
+  --sk-yellow: #FFCC00; /* (0,20,100,0) */
+  --sk-white: #FFFFFF;
+
+  /* Dashboard neutrals */
+  --sk-ink: #070A12;
+  --sk-ink-2: #0B1020;
+  --sk-surface: rgba(12, 18, 35, 0.72);
+  --sk-border: rgba(148, 163, 184, 0.16);
+}
+
+/* Toss-like mobile UI defaults */
+html {
+  /* Larger base for 50s mobile readability */
+  font-size: 18px;
+}
+
+/* NanumSquare webfont (preloaded woff2 for speed) */
+@font-face {
+  font-family: 'NanumSquare';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/@noonnu/nanum-square@0.1.0/fonts/nanumsquare-300.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'NanumSquare';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/@noonnu/nanum-square@0.1.0/fonts/nanumsquare-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'NanumSquare';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/@noonnu/nanum-square@0.1.0/fonts/nanumsquare-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'NanumSquare';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/@noonnu/nanum-square@0.1.0/fonts/nanumsquare-800.woff2') format('woff2');
+}
+
+body {
+  background: #f6f7f9;
+  color: #0b1220;
+}
+
+/* Key color roles (structure via color) */
+:root {
+  --key-primary: var(--sk-orange); /* primary CTA / selected */
+  --key-danger: var(--sk-red);     /* destructive / errors */
+  --key-highlight: var(--sk-yellow); /* highlights / emphasis */
 }
 
 @keyframes fade-in {
