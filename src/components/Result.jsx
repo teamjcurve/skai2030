@@ -1,5 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { characterData, badgeData, wefSkills } from "../data/resultData";
+import { characterData, characterImageFile, badgeData, wefSkills } from "../data/resultData";
+
+function characterImageSrc(memberResult) {
+  const file = characterImageFile[memberResult];
+  if (!file) return null;
+  return `/${encodeURIComponent(file)}`;
+}
 
 const CHARACTER_MARKS = {
   TMA: "TMA",
@@ -447,6 +453,7 @@ export default function Result({ resultType, userType, memberScore, onRestart })
   if (!character) return null;
 
   const mark = CHARACTER_MARKS[resultType.memberResult] || resultType.memberResult;
+  const charImgSrc = characterImageSrc(resultType.memberResult);
   const dominantAxes = getDominantAxes(resultType.memberResult);
   const userCoreSkills = character.coreSkills.split(",").map((s) => s.trim());
   const userDevSkills = getDevelopmentSkills({ coreSkills: userCoreSkills, memberScore, count: 3 });
@@ -456,7 +463,19 @@ export default function Result({ resultType, userType, memberScore, onRestart })
       <div className="max-w-2xl mx-auto px-5 py-10 sm:py-14 flex flex-col items-center gap-6">
 
         {/* Hero Card */}
-        <div className="w-full rounded-3xl bg-white p-7 sm:p-9 border border-black/5 shadow-sm">
+        <div className="w-full rounded-3xl bg-white border border-black/5 shadow-sm overflow-hidden">
+          {charImgSrc && (
+            <div className="-mb-px flex justify-center bg-gradient-to-b from-[color:var(--key-primary)]/[0.07] via-[#f6f7f9] to-white px-4 pt-6 pb-2 sm:px-8 sm:pt-8 sm:pb-3">
+              <img
+                src={charImgSrc}
+                alt={character.name}
+                className="h-auto w-full max-w-full object-contain max-h-[min(52vh,440px)] sm:max-h-[min(56vh,520px)] drop-shadow-[0_12px_40px_rgba(15,23,42,0.12)]"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          )}
+          <div className="p-7 sm:p-9 pt-6 sm:pt-8">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[11px] text-[color:var(--key-primary)] font-semibold tracking-widest uppercase mb-2">
@@ -489,6 +508,7 @@ export default function Result({ resultType, userType, memberScore, onRestart })
             <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
               핵심 스킬은 거센 기술의 변화 속에서도 당신이 가장 자연스럽고 강력하게 발휘하는 고유의 무기입니다. 반면, 개발 스킬은 다가오는 에이전틱 AI 시대에 의식적으로 보완해야 할 성장 포인트입니다. 이 낯선 스킬들을 장착한다면, 기술과 인간의 협업 딜레마 속에서도 대체 불가능한 리더십을 완성할 수 있습니다.
             </p>
+          </div>
           </div>
         </div>
 

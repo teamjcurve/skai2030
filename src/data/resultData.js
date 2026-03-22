@@ -21,7 +21,7 @@ export const characterData = {
     subtitle: "데이터로 미래의 거대한 숲을 설계하는 거시적 전략가",
     coreSkills: "AI 및 빅데이터, 동기 부여, 시스템적 사고",
     description:
-      "기술적 역량과 주도적인 동기를 바탕으로, 단편적 실무를 넘어 전사적 프로세스와 조직 전체가 어떻게 연결되어야 하는지를 근본적으로 기획하는 전략가입니다.",
+      "기술적 스킬과 주도적인 동기를 바탕으로, 단편적 실무를 넘어 전사적 프로세스와 조직 전체가 어떻게 연결되어야 하는지를 근본적으로 기획하는 전략가입니다.",
     strengths: [
       "파편화된 업무를 하나의 데이터 파이프라인으로 연결하여 비용을 최적화합니다.",
       "확장 가능하고 지속 가능한(Scalable) AI 인프라 로드맵을 선제적으로 구축합니다.",
@@ -89,7 +89,7 @@ export const characterData = {
     subtitle: "조직의 다양한 잠재력을 완벽한 화음으로 연결하는 지휘자",
     coreSkills: "인재 관리 및 육성, 민첩성, 시스템적 사고",
     description:
-      "사람에 대한 깊은 이해를 바탕으로 조직 문화를 역동적으로 주도하며, 개개인의 역량이 어떻게 맞물려 시너지를 내야 하는지 전체적인 판을 짜는 지휘자입니다.",
+      "사람에 대한 깊은 이해를 바탕으로 조직 문화를 역동적으로 주도하며, 개개인의 스킬이 어떻게 맞물려 시너지를 내야 하는지 전체적인 판을 짜는 지휘자입니다.",
     strengths: [
       "구성원들의 스킬 갭을 진단하고 맞춤 역할을 부여하여 디지털 스킬을 상향 평준화합니다.",
       "전사적 가치 사슬 관점에서 인적 자원을 배치하여 휴먼 에러를 최소화합니다.",
@@ -135,6 +135,18 @@ export const characterData = {
       "구성원의 감정에 이입하다 보면 본인의 감정 노동이 누적될 수 있어 셀프 리더십이 요구됩니다."
     ]
   }
+};
+
+/** `public/` 폴더의 SVG 파일명과 매칭 (URL은 공백 인코딩 필요) */
+export const characterImageFile = {
+  TMA: "Frontier Surfer.svg",
+  TMS: "System Architect.svg",
+  TRA: "Data Explorer.svg",
+  TRS: "Process Optimizer.svg",
+  WMA: "Culture Bulldozer.svg",
+  WMS: "Synergy Maestro.svg",
+  WRA: "Growth Partner.svg",
+  WRS: "Mental Guardian.svg",
 };
 
 export const wefSkills = {

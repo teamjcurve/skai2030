@@ -5,7 +5,7 @@ export default function Intro({ onProceed }) {
         <div className="w-full rounded-3xl bg-white p-6 shadow-sm border border-black/5">
           <header className="flex flex-col gap-3">
             <p className="text-xs font-semibold tracking-[0.18em] text-[color:var(--key-primary)] uppercase text-center">
-              The Tempo Balance Game
+              Skill Balance Game
             </p>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-snug text-slate-950 text-center">
               시작하기 전에
@@ -17,7 +17,7 @@ export default function Intro({ onProceed }) {
               </span>
               이 발표한{" "}
               <span className="font-bold text-slate-800">
-                '2030년 미래 핵심 역량(Core Skills)'
+                '2030년 미래 핵심 스킬(Core Skills)'
               </span>{" "}
               연구를 기반으로 설계되었습니다.
             </p>

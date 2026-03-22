@@ -33,8 +33,21 @@ export default function Main({
               <br />
               당신의 템포는?
             </span>
-            <br />
-            <br />
+          </p>
+          <div className="w-full mt-2 -mx-0.5 sm:mx-0">
+            <div className="rounded-3xl overflow-hidden border border-black/10 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)] ring-1 ring-white/60">
+              <img
+                src="/main-hero-characters-sns.png"
+                alt="2030년 AI 시대, 여덟 가지 캐릭터가 함께 협업하며 일하는 모습"
+                className="w-full h-auto block"
+                width={1376}
+                height={768}
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          </div>
+          <p className="text-slate-500 text-base sm:text-lg leading-relaxed mt-4">
             AI 기술의 거대한 물결 속에서
             <br />
             나만의 리듬을 찾아보세요.
