@@ -1,108 +1,11 @@
 import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
-import html2canvas from "html2canvas";
 import { characterData, characterImageFile, badgeData, wefSkills } from "../data/resultData";
 
 function characterImageSrc(memberResult) {
   const file = characterImageFile[memberResult];
   if (!file) return null;
   return `/${encodeURIComponent(file)}`;
-}
-
-/** html2canvas가 SVG <img>를 그릴 때 캔버스 오염·보안 오류가 나는 경우가 있어, 캡처 직전에 data URL로 바꿉니다. */
-async function inlineImagesAsDataUrl(container) {
-  const imgs = Array.from(container.querySelectorAll("img"));
-  const reverted = [];
-  await Promise.all(
-    imgs.map(async (img) => {
-      const raw = img.currentSrc || img.src;
-      if (!raw || raw.startsWith("data:")) return;
-      let absolute;
-      try {
-        absolute = new URL(raw, window.location.href).href;
-      } catch {
-        return;
-      }
-      try {
-        const res = await fetch(absolute, { credentials: "same-origin" });
-        if (!res.ok) return;
-        const blob = await res.blob();
-        const dataUrl = await new Promise((resolve, reject) => {
-          const fr = new FileReader();
-          fr.onloadend = () => resolve(fr.result);
-          fr.onerror = reject;
-          fr.readAsDataURL(blob);
-        });
-        reverted.push({ img, prev: img.src });
-        img.src = dataUrl;
-        if (img.decode) {
-          try {
-            await img.decode();
-          } catch {
-            /* ignore decode errors */
-          }
-        }
-      } catch (e) {
-        console.warn("inlineImagesAsDataUrl", absolute, e);
-      }
-    })
-  );
-  return () => {
-    for (const { img, prev } of reverted) {
-      img.src = prev;
-    }
-  };
-}
-
-function triggerPngDownload(canvas, filename) {
-  return new Promise((resolve, reject) => {
-    try {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            const u = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = u;
-            a.download = filename;
-            a.rel = "noopener";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(u);
-            resolve();
-            return;
-          }
-          try {
-            const dataUrl = canvas.toDataURL("image/png");
-            const a = document.createElement("a");
-            a.href = dataUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            resolve();
-          } catch (err) {
-            reject(err);
-          }
-        },
-        "image/png",
-        1
-      );
-    } catch (err) {
-      try {
-        const dataUrl = canvas.toDataURL("image/png");
-        const a = document.createElement("a");
-        a.href = dataUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        resolve();
-      } catch (err2) {
-        reject(err2);
-      }
-    }
-  });
 }
 
 const CHARACTER_MARKS = {
@@ -477,7 +380,7 @@ function CoreSkillsWithTooltip({ coreSkillsStr, memberScore }) {
   return (
     <div className="mb-6">
       <div className="flex flex-col gap-3">
-        <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 bg-[color:var(--key-primary)]/10 border border-[color:var(--key-primary)]/20 rounded-full px-4 py-2">
+        <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 bg-[color:var(--key-primary)]/10 border border-[color:var(--key-primary)]/20 rounded-lg px-4 py-2">
           <span className="text-sm text-[color:var(--key-primary)] font-semibold">핵심 스킬</span>
           {skills.map((skill, i) => (
             <span key={skill} className="text-sm text-slate-900 inline-flex items-center gap-0.5">
@@ -488,7 +391,7 @@ function CoreSkillsWithTooltip({ coreSkillsStr, memberScore }) {
         </div>
 
         {devSkills.length > 0 && (
-          <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 bg-[color:var(--key-highlight)]/18 border border-[color:var(--key-highlight)]/35 rounded-full px-4 py-2">
+          <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 bg-[color:var(--key-highlight)]/18 border border-[color:var(--key-highlight)]/35 rounded-lg px-4 py-2">
             <span className="text-sm text-[#7A5200] font-semibold">개발 스킬</span>
             {devSkills.map((skill, i) => (
               <span key={skill} className="text-sm text-slate-900 inline-flex items-center gap-0.5">
@@ -508,7 +411,7 @@ function BadgeCoreSkillsWithTooltip({ coreSkillsStr }) {
   const skills = coreSkillsStr.split(",").map((s) => s.trim());
 
   return (
-    <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 bg-[color:var(--key-highlight)]/18 border border-[color:var(--key-highlight)]/35 rounded-full px-4 py-2 mb-5">
+    <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 bg-[color:var(--key-highlight)]/18 border border-[color:var(--key-highlight)]/35 rounded-lg px-4 py-2 mb-5">
       <span className="text-sm text-[#7A5200] font-semibold">핵심 스킬</span>
       {skills.map((skill, i) => (
         <span key={skill} className="text-sm text-slate-900 inline-flex items-center gap-0.5">
@@ -652,7 +555,7 @@ function ListItem({ text, index }) {
 /* ── Main Result Component ── */
 export default function Result({ resultType, userType, memberScore, onRestart }) {
   const captureRef = useRef(null);
-  const [isSavingImage, setIsSavingImage] = useState(false);
+  const [isSavingPdf, setIsSavingPdf] = useState(false);
 
   const character = characterData[resultType?.memberResult];
   const badge = userType === "leader" && resultType?.leaderResult
@@ -667,54 +570,49 @@ export default function Result({ resultType, userType, memberScore, onRestart })
   const userCoreSkills = character.coreSkills.split(",").map((s) => s.trim());
   const userDevSkills = getDevelopmentSkills({ coreSkills: userCoreSkills, memberScore, count: 3 });
 
-  const saveResultAsImage = useCallback(async () => {
+  const saveResultAsPdf = useCallback(() => {
     const el = captureRef.current;
     if (!el) return;
-    setIsSavingImage(true);
-    const filename = `skill-balance-result-${mark}.png`;
-    let revertImages = () => {};
+    setIsSavingPdf(true);
 
-    const captureOptions = (extra = {}) => ({
-      scale: 2,
-      backgroundColor: "#f6f7f9",
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-      imageTimeout: 25000,
-      /** 복제 DOM에서 min() 등 미지원 CSS로 깨지는 경우 완화 */
-      onclone: (_document, cloned) => {
-        cloned.querySelectorAll("img").forEach((img) => {
-          img.style.maxHeight = "none";
-          img.style.height = "auto";
-        });
-      },
-      ...extra,
-    });
+    const originalTitle = document.title;
+    const filenameBase = `skill-balance-result-${mark}`;
+    const styleTag = document.createElement("style");
+
+    styleTag.setAttribute("data-result-print", "true");
+    styleTag.textContent = `
+      @media print {
+        @page { size: A4; margin: 12mm; }
+        body * { visibility: hidden !important; }
+        .result-print-target, .result-print-target * { visibility: visible !important; }
+        .result-print-target {
+          position: absolute !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 100% !important;
+        }
+      }
+    `;
+
+    const cleanup = () => {
+      window.removeEventListener("afterprint", cleanup);
+      el.classList.remove("result-print-target");
+      styleTag.remove();
+      document.title = originalTitle;
+      setIsSavingPdf(false);
+    };
 
     try {
-      revertImages = await inlineImagesAsDataUrl(el);
-
-      let canvas;
-      try {
-        canvas = await html2canvas(el, captureOptions());
-      } catch (firstErr) {
-        console.warn("html2canvas retry", firstErr);
-        canvas = await html2canvas(
-          el,
-          captureOptions({
-            scale: 1,
-            foreignObjectRendering: true,
-          })
-        );
-      }
-
-      await triggerPngDownload(canvas, filename);
+      document.title = filenameBase;
+      el.classList.add("result-print-target");
+      document.head.appendChild(styleTag);
+      window.addEventListener("afterprint", cleanup, { once: true });
+      // 스타일 적용 후 인쇄 대화상자를 연다.
+      setTimeout(() => window.print(), 50);
     } catch (e) {
+      cleanup();
       console.error(e);
-      window.alert("이미지를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-    } finally {
-      revertImages();
-      setIsSavingImage(false);
+      window.alert("PDF 저장을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.");
     }
   }, [mark]);
 
@@ -824,15 +722,15 @@ export default function Result({ resultType, userType, memberScore, onRestart })
         <div className="w-full max-w-xs flex flex-col gap-3 mt-1">
           <button
             type="button"
-            onClick={saveResultAsImage}
-            disabled={isSavingImage}
+            onClick={saveResultAsPdf}
+            disabled={isSavingPdf}
             className={`w-full py-4 rounded-3xl font-bold text-sm transition-all duration-200 border-2 ${
-              isSavingImage
+              isSavingPdf
                 ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
                 : "bg-white text-[color:var(--key-primary)] border-[color:var(--key-primary)] hover:bg-[color:var(--key-primary)]/5 cursor-pointer"
             }`}
           >
-            {isSavingImage ? "이미지 만들는 중…" : "결과 이미지로 저장"}
+            {isSavingPdf ? "PDF 준비 중…" : "결과 PDF로 저장"}
           </button>
           <button
             type="button"
