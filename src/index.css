@@ -22,6 +22,8 @@
 html {
   /* Larger base for 50s mobile readability */
   font-size: 18px;
+  /* 스크롤바 유무로 가로 폭이 바뀌며 중앙 정렬이 흔들리는 현상 완화 */
+  scrollbar-gutter: stable;
 }
 
 /* NanumSquare webfont (preloaded woff2 for speed) */
@@ -66,9 +68,16 @@ body {
   --key-highlight: var(--sk-yellow); /* highlights / emphasis */
 }
 
+/* `translateX(-50%)`는 left:50% 정렬용인데, flex 가운데 모달에 쓰이면 잠깐 왼쪽으로 밀린 뒤 돌아오는 것처럼 보임 */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {

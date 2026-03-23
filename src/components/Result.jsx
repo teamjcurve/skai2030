@@ -1,10 +1,108 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { createPortal } from "react-dom";
+import html2canvas from "html2canvas";
 import { characterData, characterImageFile, badgeData, wefSkills } from "../data/resultData";
 
 function characterImageSrc(memberResult) {
   const file = characterImageFile[memberResult];
   if (!file) return null;
   return `/${encodeURIComponent(file)}`;
+}
+
+/** html2canvas가 SVG <img>를 그릴 때 캔버스 오염·보안 오류가 나는 경우가 있어, 캡처 직전에 data URL로 바꿉니다. */
+async function inlineImagesAsDataUrl(container) {
+  const imgs = Array.from(container.querySelectorAll("img"));
+  const reverted = [];
+  await Promise.all(
+    imgs.map(async (img) => {
+      const raw = img.currentSrc || img.src;
+      if (!raw || raw.startsWith("data:")) return;
+      let absolute;
+      try {
+        absolute = new URL(raw, window.location.href).href;
+      } catch {
+        return;
+      }
+      try {
+        const res = await fetch(absolute, { credentials: "same-origin" });
+        if (!res.ok) return;
+        const blob = await res.blob();
+        const dataUrl = await new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onloadend = () => resolve(fr.result);
+          fr.onerror = reject;
+          fr.readAsDataURL(blob);
+        });
+        reverted.push({ img, prev: img.src });
+        img.src = dataUrl;
+        if (img.decode) {
+          try {
+            await img.decode();
+          } catch {
+            /* ignore decode errors */
+          }
+        }
+      } catch (e) {
+        console.warn("inlineImagesAsDataUrl", absolute, e);
+      }
+    })
+  );
+  return () => {
+    for (const { img, prev } of reverted) {
+      img.src = prev;
+    }
+  };
+}
+
+function triggerPngDownload(canvas, filename) {
+  return new Promise((resolve, reject) => {
+    try {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const u = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = u;
+            a.download = filename;
+            a.rel = "noopener";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(u);
+            resolve();
+            return;
+          }
+          try {
+            const dataUrl = canvas.toDataURL("image/png");
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        },
+        "image/png",
+        1
+      );
+    } catch (err) {
+      try {
+        const dataUrl = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        resolve();
+      } catch (err2) {
+        reject(err2);
+      }
+    }
+  });
 }
 
 const CHARACTER_MARKS = {
@@ -153,6 +251,36 @@ function BalanceGauge({ memberScore, dominantAxes }) {
           const rightPct = 100 - leftPct;
           const leftDominant = dominantAxes.includes(left);
 
+          const barEl = (
+            <div className="relative w-full h-6 sm:h-5 rounded-full bg-black/10 overflow-hidden flex shadow-inner">
+              <div
+                className="h-full rounded-l-full transition-all duration-500 ease-out"
+                style={{ width: `${leftPct}%`, backgroundColor: colorL }}
+              />
+              <div
+                className="h-full rounded-r-full transition-all duration-500 ease-out"
+                style={{ width: `${rightPct}%`, backgroundColor: colorR }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span className="text-[11px] sm:text-xs font-bold text-slate-900 drop-shadow-sm">
+                  {leftPct}% · {rightPct}%
+                </span>
+              </div>
+            </div>
+          );
+
+          const preferBadge = (compact) => (
+            <span
+              className={
+                compact
+                  ? "shrink-0 px-2 py-1 rounded-lg bg-[color:var(--key-primary)] text-white text-[10px] font-extrabold shadow-sm"
+                  : "px-2 py-0.5 rounded-full bg-[color:var(--key-primary)]/10 border border-[color:var(--key-primary)]/20 text-[11px] font-bold text-[color:var(--key-primary)]"
+              }
+            >
+              선호
+            </span>
+          );
+
           return (
             <div key={left + right} className="flex flex-col gap-2">
               <p className="text-sm font-extrabold text-slate-900">
@@ -163,48 +291,82 @@ function BalanceGauge({ memberScore, dominantAxes }) {
                   {subtitle}
                 </p>
               )}
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-900">{labelL}</span>
-                    {leftDominant && (
-                      <span className="px-2 py-0.5 rounded-full bg-[color:var(--key-primary)]/10 border border-[color:var(--key-primary)]/20 text-[11px] font-bold text-[color:var(--key-primary)]">
-                        선호
-                      </span>
-                    )}
+
+              {/* 모바일: 위(왼쪽 축) → 막대 → 아래(오른쪽 축), 선호 카드만 강조 */}
+              <div className="flex flex-col gap-3 sm:hidden">
+                <div
+                  className={`rounded-2xl border-2 px-3 py-3 transition-colors ${
+                    leftDominant
+                      ? "border-[color:var(--key-primary)] bg-[color:var(--key-primary)]/[0.07] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
+                      : "border-black/[0.08] bg-slate-50/90"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        왼쪽 방향
+                      </p>
+                      <p className="text-sm font-semibold text-slate-900 leading-snug">{labelL}</p>
+                      {descL ? (
+                        <p className="text-xs text-slate-500 leading-snug mt-1">{descL}</p>
+                      ) : null}
+                    </div>
+                    {leftDominant ? preferBadge(true) : null}
                   </div>
-                  {descL ? (
-                    <p className="text-xs text-slate-500 leading-snug mt-0.5">{descL}</p>
-                  ) : null}
                 </div>
-                <div className="min-w-0 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    {!leftDominant && (
-                      <span className="px-2 py-0.5 rounded-full bg-[color:var(--key-primary)]/10 border border-[color:var(--key-primary)]/20 text-[11px] font-bold text-[color:var(--key-primary)]">
-                        선호
-                      </span>
-                    )}
-                    <span className="text-sm font-semibold text-slate-900">{labelR}</span>
+
+                <div className="px-0.5">
+                  {barEl}
+                  <p className="text-[10px] text-center text-slate-400 mt-1.5">
+                    막대 왼쪽은 상단 항목, 오른쪽은 하단 항목 비중입니다
+                  </p>
+                </div>
+
+                <div
+                  className={`rounded-2xl border-2 px-3 py-3 transition-colors ${
+                    !leftDominant
+                      ? "border-[color:var(--key-primary)] bg-[color:var(--key-primary)]/[0.07] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
+                      : "border-black/[0.08] bg-slate-50/90"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        오른쪽 방향
+                      </p>
+                      <p className="text-sm font-semibold text-slate-900 leading-snug">{labelR}</p>
+                      {descR ? (
+                        <p className="text-xs text-slate-500 leading-snug mt-1">{descR}</p>
+                      ) : null}
+                    </div>
+                    {!leftDominant ? preferBadge(true) : null}
                   </div>
-                  {descR ? (
-                    <p className="text-xs text-slate-500 leading-snug mt-0.5">{descR}</p>
-                  ) : null}
                 </div>
               </div>
-              <div className="relative w-full h-5 rounded-full bg-black/10 overflow-hidden flex">
-                <div
-                  className="h-full rounded-l-full transition-all duration-500 ease-out"
-                  style={{ width: `${leftPct}%`, backgroundColor: colorL }}
-                />
-                <div
-                  className="h-full rounded-r-full transition-all duration-500 ease-out"
-                  style={{ width: `${rightPct}%`, backgroundColor: colorR }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs font-bold text-slate-900">
-                    {leftPct}% : {rightPct}%
-                  </span>
+
+              {/* 태블릿·데스크톱: 가로 2열 + 막대 */}
+              <div className="hidden sm:flex flex-col gap-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-semibold text-slate-900">{labelL}</span>
+                      {leftDominant && preferBadge(false)}
+                    </div>
+                    {descL ? (
+                      <p className="text-xs text-slate-500 leading-snug mt-0.5">{descL}</p>
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1 text-right">
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      {!leftDominant && preferBadge(false)}
+                      <span className="text-sm font-semibold text-slate-900">{labelR}</span>
+                    </div>
+                    {descR ? (
+                      <p className="text-xs text-slate-500 leading-snug mt-0.5">{descR}</p>
+                    ) : null}
+                  </div>
                 </div>
+                {barEl}
               </div>
             </div>
           );
@@ -217,48 +379,92 @@ function BalanceGauge({ memberScore, dominantAxes }) {
   );
 }
 
-/* ── Skill Tooltip ── */
+/* ── Skill Tooltip (화면 중앙 모달, 잘림 방지) ── */
 function SkillTooltip({ skill }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const titleId = useId();
   const definition = wefSkills[skill];
   const relatedAxes = SKILL_AXES[skill];
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener("pointerdown", handler);
-    return () => document.removeEventListener("pointerdown", handler);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [open]);
 
   if (!definition) return <span>{skill}</span>;
 
+  const modal = open
+    ? createPortal(
+        <div
+          className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6"
+          role="presentation"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
+            aria-label="설명 닫기"
+            onClick={() => setOpen(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            className="relative z-10 w-full max-w-sm max-h-[min(85vh,32rem)] overflow-y-auto rounded-2xl bg-white border border-black/10 shadow-2xl shadow-black/20 text-left px-4 py-3 sm:px-5 sm:py-4 text-xs text-slate-700 leading-relaxed animate-fade-in"
+          >
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <span id={titleId} className="font-bold text-slate-900 text-sm">
+                {skill}
+              </span>
+              <span className="shrink-0 px-1.5 py-0.5 rounded bg-[color:var(--key-primary)]/10 border border-[color:var(--key-primary)]/20 text-[9px] font-bold text-[color:var(--key-primary)] uppercase tracking-wider">
+                WEF 2030
+              </span>
+            </div>
+            <p className="mb-3 text-slate-700">{definition}</p>
+            {relatedAxes && (
+              <p className="text-[10px] text-slate-500 leading-snug">
+                관련 성향 축:{" "}
+                {relatedAxes.map((a) => `${AXIS_LABELS[a]}(${a})`).join(", ")}
+            </p>
+            )}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="mt-4 w-full py-2.5 rounded-xl bg-[color:var(--key-primary)] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              확인
+            </button>
+          </div>
+        </div>,
+        document.body
+      )
+    : null;
+
   return (
-    <span ref={ref} className="relative inline-flex items-center gap-1">
+    <span className="inline-flex items-center gap-1">
       <span>{skill}</span>
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className="shrink-0 w-4 h-4 rounded-full bg-[color:var(--key-primary)]/12 border border-[color:var(--key-primary)]/20 text-[10px] font-bold text-[color:var(--key-primary)] flex items-center justify-center cursor-pointer hover:bg-[color:var(--key-primary)]/18 transition-colors"
+        aria-expanded={open}
+        aria-haspopup="dialog"
       >
         ?
       </button>
-      {open && (
-        <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 sm:w-80 px-4 py-3 rounded-2xl bg-white border border-black/10 shadow-xl shadow-black/10 text-xs text-slate-700 leading-relaxed animate-fade-in">
-          <span className="flex items-center gap-2 mb-2">
-            <span className="font-bold text-slate-900">{skill}</span>
-            <span className="px-1.5 py-0.5 rounded bg-[color:var(--key-primary)]/10 border border-[color:var(--key-primary)]/20 text-[9px] font-bold text-[color:var(--key-primary)] uppercase tracking-wider">WEF 2030</span>
-          </span>
-          <span className="block mb-2">{definition}</span>
-          {relatedAxes && (
-            <span className="block text-[10px] text-slate-400">
-              관련 성향 축: {relatedAxes.map((a) => `${AXIS_LABELS[a]}(${a})`).join(", ")}
-            </span>
-          )}
-          <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white" />
-        </span>
-      )}
+      {modal}
     </span>
   );
 }
@@ -445,6 +651,9 @@ function ListItem({ text, index }) {
 
 /* ── Main Result Component ── */
 export default function Result({ resultType, userType, memberScore, onRestart }) {
+  const captureRef = useRef(null);
+  const [isSavingImage, setIsSavingImage] = useState(false);
+
   const character = characterData[resultType?.memberResult];
   const badge = userType === "leader" && resultType?.leaderResult
     ? badgeData[resultType.leaderResult]
@@ -458,9 +667,62 @@ export default function Result({ resultType, userType, memberScore, onRestart })
   const userCoreSkills = character.coreSkills.split(",").map((s) => s.trim());
   const userDevSkills = getDevelopmentSkills({ coreSkills: userCoreSkills, memberScore, count: 3 });
 
+  const saveResultAsImage = useCallback(async () => {
+    const el = captureRef.current;
+    if (!el) return;
+    setIsSavingImage(true);
+    const filename = `skill-balance-result-${mark}.png`;
+    let revertImages = () => {};
+
+    const captureOptions = (extra = {}) => ({
+      scale: 2,
+      backgroundColor: "#f6f7f9",
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      imageTimeout: 25000,
+      /** 복제 DOM에서 min() 등 미지원 CSS로 깨지는 경우 완화 */
+      onclone: (_document, cloned) => {
+        cloned.querySelectorAll("img").forEach((img) => {
+          img.style.maxHeight = "none";
+          img.style.height = "auto";
+        });
+      },
+      ...extra,
+    });
+
+    try {
+      revertImages = await inlineImagesAsDataUrl(el);
+
+      let canvas;
+      try {
+        canvas = await html2canvas(el, captureOptions());
+      } catch (firstErr) {
+        console.warn("html2canvas retry", firstErr);
+        canvas = await html2canvas(
+          el,
+          captureOptions({
+            scale: 1,
+            foreignObjectRendering: true,
+          })
+        );
+      }
+
+      await triggerPngDownload(canvas, filename);
+    } catch (e) {
+      console.error(e);
+      window.alert("이미지를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      revertImages();
+      setIsSavingImage(false);
+    }
+  }, [mark]);
+
   return (
     <div className="min-h-dvh bg-[#f6f7f9] text-slate-950">
       <div className="max-w-2xl mx-auto px-5 py-10 sm:py-14 flex flex-col items-center gap-6">
+
+        <div ref={captureRef} className="flex flex-col gap-6 w-full bg-[#f6f7f9]">
 
         {/* Hero Card */}
         <div className="w-full rounded-3xl bg-white border border-black/5 shadow-sm overflow-hidden">
@@ -557,13 +819,29 @@ export default function Result({ resultType, userType, memberScore, onRestart })
           </div>
         )}
 
-        {/* Restart */}
-        <button
-          onClick={onRestart}
-          className="w-full max-w-xs py-4 rounded-3xl bg-[color:var(--key-primary)] text-white font-bold text-sm hover:opacity-90 transition-all duration-200 cursor-pointer mt-1"
-        >
-          다시 하기
-        </button>
+        </div>
+
+        <div className="w-full max-w-xs flex flex-col gap-3 mt-1">
+          <button
+            type="button"
+            onClick={saveResultAsImage}
+            disabled={isSavingImage}
+            className={`w-full py-4 rounded-3xl font-bold text-sm transition-all duration-200 border-2 ${
+              isSavingImage
+                ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
+                : "bg-white text-[color:var(--key-primary)] border-[color:var(--key-primary)] hover:bg-[color:var(--key-primary)]/5 cursor-pointer"
+            }`}
+          >
+            {isSavingImage ? "이미지 만들는 중…" : "결과 이미지로 저장"}
+          </button>
+          <button
+            type="button"
+            onClick={onRestart}
+            className="w-full py-4 rounded-3xl bg-[color:var(--key-primary)] text-white font-bold text-sm hover:opacity-90 transition-all duration-200 cursor-pointer"
+          >
+            다시 하기
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -89,9 +89,10 @@ export default function AdminOverviewPage({
                   axisLine={{ stroke: CHART_GRID }}
                   interval={0}
                   height={56}
-                  tickFormatter={(value) =>
-                    value.length > 8 ? `${value.slice(0, 8)}…` : value
-                  }
+                  tickFormatter={(value) => {
+                    const str = String(value ?? "");
+                    return str.length > 15 ? `${str.slice(0, 15)}…` : str;
+                  }}
                 />
                 <YAxis
                   tick={{ fill: CHART_TEXT, fontSize: 11 }}

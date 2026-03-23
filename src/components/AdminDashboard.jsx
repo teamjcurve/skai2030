@@ -19,6 +19,14 @@ const ROUTES = {
   sessions: `${ADMIN_BASE}/sessions`,
 };
 
+// Admin 차트 x축 라벨용: 예) "프론티어 서퍼 (Frontier Surfer)" -> "프론티어 서퍼"
+const CHARACTER_CODE_TO_KOREAN = Object.fromEntries(
+  Object.entries(characterData).map(([code, data]) => {
+    const rawName = data?.name || code;
+    return [code, String(rawName).split("(")[0].trim()];
+  }),
+);
+
 function normalizeAdminPath(pathname) {
   if (!pathname) return ROUTES.overview;
   if (pathname === ADMIN_BASE || pathname === `${ADMIN_BASE}/`) {
@@ -74,13 +82,17 @@ function buildBadgeChartData(participants) {
 }
 
 function mapResultToParticipant(result, index = 0) {
-  const character = characterData[result.result_code];
-  const characterName = character?.name || result.result_code;
+  const code = String(result?.result_code ?? "").toUpperCase();
+  const character = characterData[code];
+  const characterName = character?.name || code;
+  const koreanCharacterType =
+    CHARACTER_CODE_TO_KOREAN[code] ||
+    String(characterName).split("(")[0].trim();
 
   return {
     id: result.id || index,
     isLeader: result.user_type === "leader",
-    characterType: characterName,
+    characterType: koreanCharacterType,
     badge: result.leader_badge,
     finishedAt: new Date(result.created_at).getTime(),
   };
