@@ -1,35 +1,102 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import Main from "./components/Main";
 import Intro from "./components/Intro";
 import Question from "./components/Question";
 import Loading from "./components/Loading";
 import Result from "./components/Result";
+import OpenFeedbackForm from "./components/OpenFeedbackForm";
 import { questions as allQuestions } from "./data/questions";
 import {
   INITIAL_MEMBER_SCORE,
-  INITIAL_LEADER_SCORE,
   calculateResult,
 } from "./data/scoringMap";
 import { supabase } from "./supabaseClient";
 
-const MEMBER_COUNT = 15;
-const LEADER_COUNT = 20;
+const MEMBER_COUNT = 22;
 
-const LEADER_BADGE_LABELS = {
-  Task_Change: "비전",
-  People_Change: "퍼실리테이터",
-  Task_Stability: "퍼포먼스",
-  People_Stability: "가디언",
-};
+const STORAGE_KEY = "game_state_v1";
+
+function loadGameState() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveGameState(next) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+}
+
+function clearGameState() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+function QuestionsRoute({
+  questions,
+  currentIndex,
+  selectedChoice,
+  onChoose,
+  onNext,
+  onPrevious,
+}) {
+  const params = useParams();
+  const idx = Number(params.index);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!Number.isFinite(idx)) {
+      navigate("/questions/1", { replace: true });
+      return;
+    }
+    const clamped = Math.min(Math.max(idx, 1), questions.length);
+    if (idx !== clamped) navigate(`/questions/${clamped}`, { replace: true });
+  }, [idx, navigate, questions.length]);
+
+  // App state is 0-based; URL is 1-based.
+  if (!Number.isFinite(idx)) return null;
+  const desiredIndex = Math.min(Math.max(idx, 1), questions.length) - 1;
+  if (desiredIndex !== currentIndex) return null;
+
+  return (
+    <Question
+      questions={questions}
+      currentIndex={currentIndex}
+      selectedChoice={selectedChoice}
+      onChoose={onChoose}
+      onNext={onNext}
+      onPrevious={onPrevious}
+    />
+  );
+}
 
 export default function App() {
-  const [screen, setScreen] = useState("main");
-  const [userType, setUserType] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [draftChoice, setDraftChoice] = useState(null);
   const [memberScore, setMemberScore] = useState({ ...INITIAL_MEMBER_SCORE });
-  const [leaderScore, setLeaderScore] = useState({ ...INITIAL_LEADER_SCORE });
   const [resultType, setResultType] = useState(null);
 
   const [sessionId, setSessionId] = useState(() => {
@@ -47,36 +114,48 @@ export default function App() {
   const [isValidatingSession, setIsValidatingSession] = useState(false);
   const [sessionError, setSessionError] = useState("");
 
-  const questions = userType === "leader"
-    ? allQuestions.slice(0, LEADER_COUNT)
-    : allQuestions.slice(0, MEMBER_COUNT);
-
-  useEffect(() => {
-    if (screen !== "loading") return;
-    const timer = setTimeout(() => setScreen("result"), 3000);
-    return () => clearTimeout(timer);
-  }, [screen]);
+  const questions = useMemo(
+    () => allQuestions.slice(0, MEMBER_COUNT),
+    [allQuestions],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (screen === "intro") {
-      window.scrollTo(0, 0);
-    }
-  }, [screen]);
+    const next = loadGameState();
+    if (!next) return;
+
+    setCurrentQuestionIndex(Number(next.currentQuestionIndex ?? 0));
+    setAnswers(Array.isArray(next.answers) ? next.answers : []);
+    setDraftChoice(next.draftChoice ?? null);
+    setMemberScore(next.memberScore ?? { ...INITIAL_MEMBER_SCORE });
+    setResultType(next.resultType ?? null);
+  }, []);
 
   useEffect(() => {
-    if (!supabase || !resultType || !sessionId || !userType) return;
+    saveGameState({
+      currentQuestionIndex,
+      answers,
+      draftChoice,
+      memberScore,
+      resultType,
+    });
+  }, [answers, currentQuestionIndex, draftChoice, memberScore, resultType]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!supabase || !resultType || !sessionId) return;
 
     const saveResult = async () => {
       try {
         const payload = {
           session_id: sessionId,
-          user_type: userType,
+          user_type: "member",
           result_code: resultType.memberResult,
-          leader_badge:
-            userType === "leader" && resultType.leaderResult
-              ? LEADER_BADGE_LABELS[resultType.leaderResult] ?? null
-              : null,
+          leader_badge: null,
         };
 
         const { error } = await supabase.from("results").insert(payload);
@@ -91,7 +170,7 @@ export default function App() {
     };
 
     saveResult();
-  }, [resultType, sessionId, userType]);
+  }, [resultType, sessionId]);
 
   const handleValidateSession = async () => {
     if (!supabase) {
@@ -149,7 +228,6 @@ export default function App() {
   };
 
   const handleStart = () => {
-    if (!userType) return;
     if (!isSessionValid || !sessionId) {
       setSessionError(
         "게임을 시작하기 전에 유효한 차수 코드를 먼저 확인해 주세요.",
@@ -160,28 +238,28 @@ export default function App() {
     setAnswers([]);
     setDraftChoice(null);
     setMemberScore({ ...INITIAL_MEMBER_SCORE });
-    setLeaderScore({ ...INITIAL_LEADER_SCORE });
     setResultType(null);
-    setScreen("intro");
+    clearGameState();
+    navigate("/guide");
   };
 
   const handleProceedIntro = () => {
     setDraftChoice(null);
-    setScreen("question");
+    navigate("/questions/1");
   };
 
-  function applyOptionDelta({ member, leader }, option, delta) {
+  const handleGoCanvasForm = () => {
+    navigate("/open-feedback/canvas");
+  };
+
+  const handleGoLeaderForm = () => {
+    navigate("/open-feedback/leader");
+  };
+
+  function applyOptionDelta(member, option, delta) {
     const nextMember = { ...member };
-    const nextLeader = { ...leader };
-
-    if (option?.axis) nextMember[option.axis] += delta;
-    if (option?.axisLeader) {
-      for (const axis of option.axisLeader) {
-        nextLeader[axis] += delta;
-      }
-    }
-
-    return { member: nextMember, leader: nextLeader };
+    if (option?.skill) nextMember[option.skill] += delta;
+    return nextMember;
   }
 
   const handleNext = () => {
@@ -201,12 +279,12 @@ export default function App() {
           ? currentQuestion.optionB
           : null;
 
-    let scores = { member: memberScore, leader: leaderScore };
+    let score = memberScore;
     if (prevOption && prevChoice !== draftChoice) {
-      scores = applyOptionDelta(scores, prevOption, -1);
+      score = applyOptionDelta(score, prevOption, -1);
     }
     if (!prevOption || prevChoice !== draftChoice) {
-      scores = applyOptionDelta(scores, nextOption, +1);
+      score = applyOptionDelta(score, nextOption, +1);
     }
 
     const nextAnswers = [...answers];
@@ -216,8 +294,7 @@ export default function App() {
     };
 
     setAnswers(nextAnswers);
-    setMemberScore(scores.member);
-    setLeaderScore(scores.leader);
+    setMemberScore(score);
 
     const nextIndex = currentQuestionIndex + 1;
     if (nextIndex < questions.length) {
@@ -225,18 +302,19 @@ export default function App() {
       const nextQ = questions[nextIndex];
       const existing = nextAnswers[nextIndex];
       setDraftChoice(existing?.questionId === nextQ.id ? existing.choice : null);
+      navigate(`/questions/${nextIndex + 1}`);
     } else {
-      const result = calculateResult(scores.member, scores.leader, userType);
+      const result = calculateResult(score);
       setResultType(result);
       setDraftChoice(null);
-      setScreen("loading");
+      navigate("/loading");
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestionIndex <= 0) {
       setDraftChoice(null);
-      setScreen("intro");
+      navigate("/guide");
       return;
     }
     const nextIndex = currentQuestionIndex - 1;
@@ -244,59 +322,93 @@ export default function App() {
     const prevQ = questions[nextIndex];
     const existing = answers[nextIndex];
     setDraftChoice(existing?.questionId === prevQ.id ? existing.choice : null);
+    navigate(`/questions/${nextIndex + 1}`);
   };
 
   const handleRestart = () => {
-    setScreen("main");
-    setUserType(null);
+    clearGameState();
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setDraftChoice(null);
     setMemberScore({ ...INITIAL_MEMBER_SCORE });
-    setLeaderScore({ ...INITIAL_LEADER_SCORE });
     setResultType(null);
+    navigate("/");
   };
 
-  switch (screen) {
-    case "main":
-      return (
-        <Main
-          userType={userType}
-          setUserType={setUserType}
-          sessionCode={sessionCode}
-          setSessionCode={setSessionCode}
-          onValidateSession={handleValidateSession}
-          isSessionValid={isSessionValid}
-          isValidatingSession={isValidatingSession}
-          sessionError={sessionError}
-          onStart={handleStart}
-        />
-      );
-    case "intro":
-      return <Intro onProceed={handleProceedIntro} />;
-    case "question":
-      return (
-        <Question
-          questions={questions}
-          currentIndex={currentQuestionIndex}
-          selectedChoice={draftChoice}
-          onChoose={setDraftChoice}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-        />
-      );
-    case "loading":
-      return <Loading />;
-    case "result":
-      return (
-        <Result
-          resultType={resultType}
-          userType={userType}
-          memberScore={memberScore}
-          onRestart={handleRestart}
-        />
-      );
-    default:
-      return null;
-  }
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Main
+            sessionCode={sessionCode}
+            setSessionCode={setSessionCode}
+            onValidateSession={handleValidateSession}
+            isSessionValid={isSessionValid}
+            isValidatingSession={isValidatingSession}
+            sessionError={sessionError}
+            onStart={handleStart}
+            onGoCanvasForm={handleGoCanvasForm}
+            onGoLeaderForm={handleGoLeaderForm}
+          />
+        }
+      />
+      <Route
+        path="/open-feedback/canvas"
+        element={<OpenFeedbackForm mode="canvas" sessionId={sessionId} />}
+      />
+      <Route
+        path="/open-feedback/leader"
+        element={<OpenFeedbackForm mode="leader" sessionId={sessionId} />}
+      />
+      <Route path="/guide" element={<Intro onProceed={handleProceedIntro} />} />
+      <Route
+        path="/questions/:index"
+        element={
+          <QuestionsRoute
+            questions={questions}
+            currentIndex={currentQuestionIndex}
+            selectedChoice={draftChoice}
+            onChoose={setDraftChoice}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+          />
+        }
+      />
+      <Route
+        path="/loading"
+        element={
+          <LoadingRedirect
+            hasResult={Boolean(resultType)}
+            onDone={() => navigate("/result", { replace: true })}
+          />
+        }
+      />
+      <Route
+        path="/result"
+        element={
+          resultType ? (
+            <Result
+              resultType={resultType}
+              memberScore={memberScore}
+              onRestart={handleRestart}
+            />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+function LoadingRedirect({ hasResult, onDone }) {
+  useEffect(() => {
+    if (!hasResult) return;
+    const t = setTimeout(() => onDone(), 600);
+    return () => clearTimeout(t);
+  }, [hasResult, onDone]);
+
+  return <Loading />;
 }

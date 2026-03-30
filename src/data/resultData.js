@@ -1,152 +1,143 @@
-export const characterData = {
-  TMA: {
-    name: "프론티어 서퍼 (Frontier Surfer)",
-    subtitle: "누구보다 먼저 트렌드의 파도에 올라타는 혁신적 행동파",
-    coreSkills: "기술 리터러시, 민첩성, 분석적 사고",
-    description:
-      "새로운 기술을 빠르게 인지하고, 변화에 민첩하게 올라타 당장 내 실무의 구체적인 문제를 해결하는 데 적용하는 얼리어답터입니다.",
-    strengths: [
-      "최신 AI 솔루션을 빠르게 내재화하여 업무 생산성을 비약적으로 끌어올립니다.",
-      "불확실성 속에서도 애자일(Agile)한 실행력으로 팀에 혁신 에너지를 전파합니다.",
-      "정형화된 프로세스에 얽매이지 않고 창의적인 돌파구를 제시합니다."
-    ],
-    improvements: [
-      "기술 도입의 속도를 중시하다 보니 시스템 연동성 등 거시적 검토가 누락될 수 있습니다.",
-      "팀원들의 온보딩 속도를 배려하는 태도가 필요합니다.",
-      "단발성 실험으로 데이터 파편화가 발생할 수 있어, 장기적인 목적 설정이 필요합니다."
-    ]
-  },
-  TMS: {
-    name: "시스템 아키텍트 (System Architect)",
-    subtitle: "데이터로 미래의 거대한 숲을 설계하는 거시적 전략가",
-    coreSkills: "AI 및 빅데이터, 동기 부여, 시스템적 사고",
-    description:
-      "기술적 스킬과 주도적인 동기를 바탕으로, 단편적 실무를 넘어 전사적 프로세스와 조직 전체가 어떻게 연결되어야 하는지를 근본적으로 기획하는 전략가입니다.",
-    strengths: [
-      "파편화된 업무를 하나의 데이터 파이프라인으로 연결하여 비용을 최적화합니다.",
-      "확장 가능하고 지속 가능한(Scalable) AI 인프라 로드맵을 선제적으로 구축합니다.",
-      "부서 간 데이터 사일로(Silo)를 짚어내고 데이터 기반 의사결정 환경을 조성합니다."
-    ],
-    improvements: [
-      "거시적 시스템 설계에 집중하여 실무진의 세밀한 페인포인트(Pain-point)를 놓칠 수 있습니다.",
-      "탑다운 방식의 변화는 저항을 부를 수 있어 유연한 소통 전략이 필요합니다.",
-      "기획의 정교함이 실행 지연으로 이어질 수 있어 MVP 단위의 빠른 테스트가 병행되어야 합니다."
-    ]
-  },
-  TRA: {
-    name: "데이터 익스플로러 (Data Explorer)",
-    subtitle: "오류와 변수를 끝까지 파고들어 진실을 찾아내는 집요한 해결사",
-    coreSkills: "호기심, 회복탄력성, 분석적 사고",
-    description:
-      "화려한 트렌드보다 정확한 데이터를 중시하며, 흔들림 없는 끈기로 작은 오류나 변수까지 집요하게 파고들어 완벽한 디테일을 검증해 내는 해결사입니다.",
-    strengths: [
-      "AI 모델의 환각 현상(Hallucination)이나 편향성을 짚어내어 의사결정 리스크를 차단합니다.",
-      "숨겨진 근본 원인을 다각도로 교차 검증하여 하이 퀄리티의 인사이트를 도출합니다.",
-      "끊임없는 팩트 체크를 통해 팀 내 '가장 믿고 맡길 수 있는 검증 관문' 역할을 합니다."
-    ],
-    improvements: [
-      "100% 무결점을 추구하여 애자일 환경에서 분석 마비(Analysis Paralysis)에 빠질 우려가 있습니다.",
-      "때로는 불확실성 속에서도 가설을 바탕으로 과감하게 실행하는 린(Lean) 접근법이 필요합니다.",
-      "분석에 과몰입하여 협업 빈도가 낮아질 수 있으므로 수시로 인사이트를 공유해야 합니다."
-    ]
-  },
-  TRS: {
-    name: "프로세스 옵티마이저 (Process Optimizer)",
-    subtitle: "어떤 변수에도 흔들림 없는 최적의 효율을 구축하는 안정화 장인",
-    coreSkills: "AI 및 빅데이터, 회복탄력성, 시스템적 사고",
-    description:
-      "기술의 힘을 활용하되 무리한 모험보다는, 예기치 못한 외부 변화 속에서도 안정성을 방어하며 전체 비즈니스 연속성을 지켜내는 장인입니다.",
-    strengths: [
-      "급격한 환경 변화나 오류 발생 시 고도의 회복탄력성으로 비즈니스 연속성을 유지합니다.",
-      "업무의 병목 구간을 진단하고 자동화하여 운영 리소스 낭비를 제로화합니다.",
-      "감정적 동요 없이 철저히 객관적인 판단으로 팀의 핵심 성과 지표(KPI)를 견고하게 수호합니다."
-    ],
-    improvements: [
-      "운영의 안정성을 최우선시하여 파괴적 혁신이나 낯선 AI 툴의 초기 도입에 방어적일 수 있습니다.",
-      "최적화에만 머무를 경우 패러다임 전환기에 뒤처질 수 있어 과감한 리스크 테이킹이 필요합니다.",
-      "안정화 이후에는 선제적으로 새로운 가치를 창출하는 신사업 모델로 시야를 넓혀야 합니다."
-    ]
-  },
-  WMA: {
-    name: "컬처 불도저 (Culture Bulldozer)",
-    subtitle: "뜨거운 열정으로 변화의 선봉에 서는 팀의 행동 대장",
-    coreSkills: "사회적 영향력, 동기 부여, 분석적 사고",
-    description:
-      "특유의 친화력과 주도적인 돌파력을 결합하여, 실무에서 마주하는 구체적인 비효율과 관행을 앞장서서 부수고 동료들의 행동을 이끌어내는 행동 대장입니다.",
-    strengths: [
-      "변화 관리에 탁월하여 구성원들의 신기술 도입 허들을 빠르게 낮추고 모멘텀을 확보합니다.",
-      "강력한 동기 부여로 부서 간 사일로를 허물고 사람들을 융합해 냅니다.",
-      "실패를 두려워하지 않는 심리적 안전감을 조직에 전파하여 프로젝트 실행을 이끕니다."
-    ],
-    improvements: [
-      "강하게 밀어붙이는 성향 탓에 신중하게 리스크를 검토하려는 동료들의 페이스를 놓칠 수 있습니다.",
-      "직관적 실행이 데이터 기반 의사결정을 간과하게 할 수 있어 실행 전 지표 확인이 필요합니다.",
-      "본인의 번아웃을 관리하고 구성원의 속도를 세심하게 모니터링해야 합니다."
-    ]
-  },
-  WMS: {
-    name: "시너지 마에스트로 (Synergy Maestro)",
-    subtitle: "조직의 다양한 잠재력을 완벽한 화음으로 연결하는 지휘자",
-    coreSkills: "인재 관리 및 육성, 민첩성, 시스템적 사고",
-    description:
-      "사람에 대한 깊은 이해를 바탕으로 조직 문화를 역동적으로 주도하며, 개개인의 스킬이 어떻게 맞물려 시너지를 내야 하는지 전체적인 판을 짜는 지휘자입니다.",
-    strengths: [
-      "구성원들의 스킬 갭을 진단하고 맞춤 역할을 부여하여 디지털 스킬을 상향 평준화합니다.",
-      "전사적 가치 사슬 관점에서 인적 자원을 배치하여 휴먼 에러를 최소화합니다.",
-      "다양한 스킬 간의 시너지를 극대화하여 집단 지성을 활용한 문제 해결 구조를 설계합니다."
-    ],
-    improvements: [
-      "거시적 매니지먼트에 집중하다 보면 본인이나 실무자 단위의 기술적 실행력이 더뎌질 수 있습니다.",
-      "모든 의견을 수렴하려다 의사결정이 지연될 수 있어 때로는 빠른 결단이 필요합니다.",
-      "권한 위임을 통해 구성원들이 자율적이고 애자일하게 움직이도록 촉진해야 합니다."
-    ]
-  },
-  WRA: {
-    name: "그로스 파트너 (Growth Partner)",
-    subtitle: "진정성 있는 공감으로 발맞춰 걷는 든든한 러닝 메이트",
-    coreSkills: "공감 및 적극적 경청, 회복탄력성, 분석적 사고",
-    description:
-      "화려하게 앞서기보다 옆에 있는 동료와 깊이 소통하고, 서로의 어려움을 멘탈적으로 지지하며, 세세한 1:1 코칭과 피드백을 통해 함께 성장하는 따뜻한 러닝 메이트입니다.",
-    strengths: [
-      "높은 공감 능력으로 마찰을 중재하고 피어 러닝(Peer-learning) 문화를 주도합니다.",
-      "디지털 전환에서 소외되는 동료가 없도록 챙기며 시스템 온보딩에 핵심 역할을 합니다.",
-      "타인의 관점을 수용하여 사용자의 페인포인트를 짚어내는 뛰어난 경험 중심 기획력을 발휘합니다."
-    ],
-    improvements: [
-      "관계를 중시하여 반드시 짚고 넘어가야 할 비판적 피드백이나 쓴소리를 주저할 수 있습니다.",
-      "조직의 성장을 위해 '건강한 갈등(Healthy Conflict)'을 직면할 용기가 필요합니다.",
-      "동료를 돕느라 본인의 핵심 성과 달성이 지연될 수 있어 업무 바운더리 설정이 중요합니다."
-    ]
-  },
-  WRS: {
-    name: "멘탈 가디언 (Mental Guardian)",
-    subtitle: "위기 속에서 흔들리지 않고 조직의 중심을 잡아주는 닻",
-    coreSkills: "리더십, 회복탄력성, 시스템적 사고",
-    description:
-      "거센 변화와 위기 속에서도 조직 전체의 멘탈을 보듬고, 실패를 극복할 수 있는 안정감을 제공하며 팀의 코어 밸류라는 중심축을 굳건히 지킵니다.",
-    strengths: [
-      "불확실성이 극대화된 상황에서 흔들림 없는 태도로 조직의 심리적 안정을 수호합니다.",
-      "실패를 성장의 발판으로 삼는 레슨런 문화를 조성하여 조직의 회복탄력성을 끌어올립니다.",
-      "미세한 스트레스 시그널을 사전에 캐치하여 번아웃을 방지하는 탁월한 리스크 관리를 보여줍니다."
-    ],
-    improvements: [
-      "안정을 최우선으로 두어 파괴적 혁신이 필요한 타이밍에 챌린지를 수용하기 어려울 수 있습니다.",
-      "혁신적 성과를 위해 컴포트 존(Comfort Zone)을 벗어나 조직에 의도적인 텐션을 가해야 합니다.",
-      "구성원의 감정에 이입하다 보면 본인의 감정 노동이 누적될 수 있어 셀프 리더십이 요구됩니다."
-    ]
-  }
+export const SKILL_LABELS = {
+  resilience_agility: "회복탄력성 및 민첩성",
+  ai_bigdata: "AI 및 빅데이터 활용",
+  analytical_thinking: "분석적 사고",
+  creative_thinking: "창의적 사고",
+  tech_literacy: "기술 리터러시",
+  leadership_influence: "리더십 및 사회적 영향력",
+  curiosity_lifelong_learning: "호기심 및 평생 학습",
+  systems_thinking: "시스템적 사고",
+  talent_development: "인재 관리 및 육성",
+  motivation_self_awareness: "동기 부여 및 자기 인식",
+  empathy_active_listening: "공감 및 적극적 경청",
 };
 
-/** `public/` 폴더의 SVG 파일명과 매칭 (URL은 공백 인코딩 필요) */
+export const characterData = {
+  resilience_agility: {
+    name: "다이내믹 서퍼 (Dynamic Surfer)",
+    subtitle:
+      "예기치 못한 변화의 파도가 덮쳐와도 당황하지 않고, 오히려 그 파도를 유연하게 타며 앞으로 나아가는 역동적인 서퍼.",
+    coreSkills: SKILL_LABELS.resilience_agility,
+    description:
+      "예상 밖의 변동 속에서도 빠르게 적응하고, 템포를 끌어올리며 상황을 전환시키는 데 강점이 있습니다. 갑작스러운 일정 변경이나 변수 앞에서도 감정 소모를 최소화하고, 우선순위를 신속하게 재정렬합니다. 위기 상황에서도 실행력을 잃지 않아 팀의 흐름이 끊기지 않도록 중심을 잡아줍니다. 새로운 조건을 부담이 아닌 실험 기회로 해석해, 더 나은 대안을 빠르게 테스트합니다. 덕분에 불확실성이 큰 프로젝트일수록 안정적인 추진력을 만들어내는 역할을 합니다.",
+    strengths: [],
+    improvements: [],
+  },
+  ai_bigdata: {
+    name: "디지털 오라클 (Digital Oracle)",
+    subtitle:
+      "빅데이터 속 흐름과 AI의 강력한 예측력을 활용하여, 불확실성 속에서도 인사이트를 제시하는 디지털 현인.",
+    coreSkills: SKILL_LABELS.ai_bigdata,
+    description:
+      "AI/데이터의 힘을 실무에 연결해 빠르게 핵심을 뽑고, 더 나은 판단을 돕는 데 강점이 있습니다. 방대한 정보 속에서 중요한 신호를 선별해 의사결정의 속도와 정확도를 동시에 높입니다. 직관에만 의존하지 않고 근거 기반으로 옵션을 비교해, 설득력 있는 결론을 제시합니다. 반복 업무에는 자동화와 도구 활용을 적용해 팀의 생산성을 체계적으로 끌어올립니다. 결과적으로 데이터가 실제 성과로 이어지도록 실행 가능한 인사이트를 만들어내는 타입입니다.",
+    strengths: [],
+    improvements: [],
+  },
+  analytical_thinking: {
+    name: "데이터 연금술사 (Data Alchemist)",
+    subtitle:
+      "무의미하게 흩어져 있는 정보의 파편들을 섬세하게 해체하고 다시 연결하여, 새로운 의미와 규칙성의 패턴으로 직조해 내는 통찰의 장인.",
+    coreSkills: SKILL_LABELS.analytical_thinking,
+    description:
+      "논리 구조와 근거를 정교하게 세우고, 정확성과 타당성을 끝까지 검증하는 데 강점이 있습니다. 이슈를 감으로 넘기지 않고 사실, 가정, 결론을 분리해 판단의 품질을 높입니다. 복잡한 문제를 작은 단위로 분해해 핵심 원인을 찾아내는 데 매우 능숙합니다. 중요한 의사결정 전에는 리스크와 예외 케이스를 꼼꼼히 점검해 시행착오를 줄입니다. 그래서 팀 내에서는 '마지막 검증 관문' 역할을 맡을 때 가장 빛을 발합니다.",
+    strengths: [],
+    improvements: [],
+  },
+  creative_thinking: {
+    name: "아이디어 스파크 (Idea Spark)",
+    subtitle:
+      "모두가 익숙한 방식에 머물러 있을 때, 완전히 새로운 관점으로 톡톡 튀는 돌파구를 찾아내 조직에 혁신의 불꽃을 튀기는 존재.",
+    coreSkills: SKILL_LABELS.creative_thinking,
+    description:
+      "형식에 갇히지 않고 새 조합과 대안을 떠올려, 변화를 촉발하는 아이디어를 제시하는 데 강점이 있습니다. 익숙한 문제도 다른 프레임으로 재정의해 전혀 다른 해법을 끌어냅니다. 여러 분야의 사례를 유연하게 연결해 참신하면서도 실용적인 제안을 만듭니다. 정체된 팀 분위기에 새로운 자극을 주어 실행의 동력을 되살립니다. 특히 초기 기획, 브레인스토밍, 실험 설계 단계에서 강한 존재감을 보입니다.",
+    strengths: [],
+    improvements: [],
+  },
+  tech_literacy: {
+    name: "테크 플루언트 (Tech Fluent)",
+    subtitle:
+      "낯선 기술이나 디지털 도구도 새로운 언어처럼 습득하여, 어떤 디지털 환경에서도 막힘없이 소통하는 다국어 구사자.",
+    coreSkills: SKILL_LABELS.tech_literacy,
+    description:
+      "새로운 툴/시스템을 빠르게 탐색하고 습득해, 일을 더 똑똑하게 만드는 데 강점이 있습니다. 낯선 인터페이스나 기능도 짧은 시간 안에 익혀 바로 실무에 적용합니다. 도구의 장단점을 빠르게 파악해 팀 상황에 맞는 활용 방식을 제안합니다. 반복적이고 비효율적인 작업을 발견하면 자동화 가능한 포인트를 놓치지 않습니다. 그 결과 팀 전체의 디지털 적응 속도를 끌어올리는 촉진자 역할을 수행합니다.",
+    strengths: [],
+    improvements: [],
+  },
+  leadership_influence: {
+    name: "컬처 크리에이터 (Culture Creator)",
+    subtitle:
+      "권위로 지시하기보다 진정성 있는 솔선수범이라는 조약돌을 던져, 조직 내에 자발적이고 긍정적인 변화의 파동을 퍼뜨리는 진원지.",
+    coreSkills: SKILL_LABELS.leadership_influence,
+    description:
+      "정체된 흐름을 움직이고, 팀이 한 방향으로 나아가도록 분위기·의사결정을 이끄는 데 강점이 있습니다. 갈등 상황에서도 사람들의 의도를 읽고 공통 목표로 시선을 다시 모읍니다. 필요한 순간에는 명확한 메시지로 우선순위를 제시해 실행 속도를 높입니다. 혼자 잘하는 것에 그치지 않고 주변의 참여를 이끌어 팀의 집단 성과를 만듭니다. 변화가 필요한 시점에 조직 내 긍정적 에너지를 확산시키는 힘이 큽니다.",
+    strengths: [],
+    improvements: [],
+  },
+  curiosity_lifelong_learning: {
+    name: "지적 유목민 (Intellect Nomad)",
+    subtitle:
+      "과거의 지식이나 성공 방정식에 머물지 않고, 늘 새로운 지식과 경험의 오아시스를 찾아 경계 없이 넘나드는 지적 유목민.",
+    coreSkills: SKILL_LABELS.curiosity_lifelong_learning,
+    description:
+      "새로운 자극과 학습을 통해 시야를 넓히고, 성장의 재료를 스스로 찾아 확장하는 데 강점이 있습니다. 최신 트렌드와 기술 변화를 빠르게 캐치해 업무에 접목할 아이디어를 축적합니다. 모르는 영역을 두려워하기보다 질문과 탐색으로 이해의 폭을 넓혀 갑니다. 학습한 내용을 개인 차원에 머물지 않고 팀에 공유해 집단 학습 효과를 만듭니다. 그래서 장기적으로 변화 대응력이 높은 팀 문화를 만드는 데 기여합니다.",
+    strengths: [],
+    improvements: [],
+  },
+  systems_thinking: {
+    name: "매크로 렌즈 (Macro Lens)",
+    subtitle:
+      "나무 하나가 아닌 숲 전체를 조망하며, 각 요소들이 어떻게 연결되는지 꿰뚫어 보는 거시적 관찰자.",
+    coreSkills: SKILL_LABELS.systems_thinking,
+    description:
+      "부분을 넘어 전체의 연결과 파급을 보고, 흐름이 매끄럽게 돌아가게 만드는 데 강점이 있습니다. 단일 과제의 성과뿐 아니라 전후 공정과 협업 구조까지 함께 고려합니다. 의사결정이 다른 팀과 프로세스에 미칠 영향을 사전에 예측해 리스크를 줄입니다. 복잡한 관계를 구조화해 모두가 같은 그림을 보며 움직이게 돕습니다. 특히 여러 부서가 얽힌 프로젝트에서 조율자이자 설계자로서 강점을 발휘합니다.",
+    strengths: [],
+    improvements: [],
+  },
+  talent_development: {
+    name: "포텐셜 부스터 (Potential Booster)",
+    subtitle:
+      "구성원들이 한계를 넘어 더 높은 목표로 도약하도록, 진심 어린 피드백과 든든한 지지로 성장을 불어넣는 추진체.",
+    coreSkills: SKILL_LABELS.talent_development,
+    description:
+      "사람의 강점과 성장을 포착해, 팀의 잠재력을 끌어올리는 코칭/육성에 강점이 있습니다. 구성원의 현재 역량과 잠재력을 구분해 맞춤형 성장 방향을 제시합니다. 단순한 지시보다 질문과 피드백을 통해 스스로 답을 찾도록 돕습니다. 적절한 난도의 과제를 부여해 성취 경험을 쌓게 하고 자신감을 높입니다. 결과적으로 개인 성장을 팀 성과로 연결하는 선순환 구조를 만드는 데 능합니다.",
+    strengths: [],
+    improvements: [],
+  },
+  motivation_self_awareness: {
+    name: "코어 모티베이터 (Core Motivator)",
+    subtitle:
+      "타인의 시선이나 외부의 보상이 아닌, 내면의 나침반이 가리키는 가치와 목표를 향해 스스로 동력을 만들어 나아가는 길잡이.",
+    coreSkills: SKILL_LABELS.motivation_self_awareness,
+    description:
+      "균형과 목표를 스스로 조율하며, 의미를 부여해 꾸준히 추진력을 만드는 데 강점이 있습니다. 외부 평가에 흔들리기보다 본인의 기준과 우선순위를 명확히 세워 움직입니다. 에너지 관리와 집중 포인트를 잘 조절해 장기 과제에서도 페이스를 유지합니다. 어려운 과제도 '왜 이 일을 하는가'를 스스로 납득하며 지속 가능한 동력을 만듭니다. 그래서 변화가 잦은 환경에서도 안정적으로 성과를 축적하는 타입입니다.",
+    strengths: [],
+    improvements: [],
+  },
+  empathy_active_listening: {
+    name: "하트 핑퐁 (Heart Ping-pong)",
+    subtitle:
+      "상대방의 말 속 미세한 의미와 감정에까지 온전히 귀 기울이고, 진심 어린 공감의 핑퐁으로 화답하는 소통의 안식처.",
+    coreSkills: SKILL_LABELS.empathy_active_listening,
+    description:
+      "경청과 공감으로 신뢰를 만들고, 관계·협업의 마찰을 낮추는 데 강점이 있습니다. 상대의 말뿐 아니라 감정의 맥락까지 읽어 대화의 온도를 맞춥니다. 의견 충돌 상황에서도 각자의 관점을 존중해 건설적인 합의점을 찾습니다. 동료들이 심리적으로 안전하다고 느끼는 분위기를 만들기 때문에 협업 효율이 높아집니다. 결과적으로 팀 내 신뢰 자본을 쌓아 장기적인 협업 성과를 지탱하는 역할을 합니다.",
+    strengths: [],
+    improvements: [],
+  },
+};
+
+/** `public/` 폴더의 이미지 파일명과 매칭 (URL은 공백 인코딩 필요) */
 export const characterImageFile = {
-  TMA: "Frontier Surfer.svg",
-  TMS: "System Architect.svg",
-  TRA: "Data Explorer.svg",
-  TRS: "Process Optimizer.svg",
-  WMA: "Culture Bulldozer.svg",
-  WMS: "Synergy Maestro.svg",
-  WRA: "Growth Partner.svg",
-  WRS: "Mental Guardian.svg",
+  resilience_agility: "Dynamic Surfer.jpg",
+  ai_bigdata: "Digital Oracle.jpg",
+  analytical_thinking: "Data Alchemist.jpg",
+  creative_thinking: "Idea Spark.jpg",
+  tech_literacy: "Tech Fluent.jpg",
+  leadership_influence: "Culture Creator.jpg",
+  curiosity_lifelong_learning: "Intellect Nomad.jpg",
+  systems_thinking: "Macro Lens.jpg",
+  talent_development: "Potential Booster.jpg",
+  motivation_self_awareness: "Core Motivator.jpg",
+  empathy_active_listening: "Heart Pingpong.jpg",
 };
 
 export const wefSkills = {

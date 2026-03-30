@@ -59,6 +59,11 @@ html {
 body {
   background: #f6f7f9;
   color: #0b1220;
+  /* Korean typography: prevent awkward breaks */
+  word-break: keep-all;
+  line-break: strict;
+  /* Still allow long URLs/English tokens to wrap */
+  overflow-wrap: anywhere;
 }
 
 /* Key color roles (structure via color) */

@@ -29,7 +29,7 @@ export default function Intro({ onProceed }) {
               </span>{" "}
               직관적으로 선택해 주세요! 나의 선택들이 모여 나만의 고유한{" "}
               <span className="font-bold text-slate-900">
-                'AI 시대 캐릭터(8가지 유형)'
+                'AI 시대 캐릭터(11가지 유형)'
               </span>
               를 도출해 냅니다.
             </p>

@@ -1,7 +1,7 @@
 export default function Main({
-  userType,
-  setUserType,
   onStart,
+  onGoCanvasForm,
+  onGoLeaderForm,
   sessionCode,
   setSessionCode,
   onValidateSession,
@@ -37,8 +37,8 @@ export default function Main({
           <div className="w-full mt-2 -mx-0.5 sm:mx-0">
             <div className="rounded-3xl overflow-hidden border border-black/10 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)] ring-1 ring-white/60">
               <img
-                src="/main-hero-characters-sns.png"
-                alt="2030년 AI 시대, 여덟 가지 캐릭터가 함께 협업하며 일하는 모습"
+                src="/main-hero-characters-11.png"
+                alt="2030년 AI 시대, 열한 가지 캐릭터가 함께 협업하며 일하는 모습"
                 className="w-full h-auto block"
                 width={1376}
                 height={768}
@@ -104,45 +104,35 @@ export default function Main({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setUserType("member")}
-              className={`py-4 rounded-3xl font-semibold text-base transition-all duration-200 cursor-pointer border text-center ${
-                userType === "member"
-                  ? "bg-white border-[color:var(--key-primary)] text-slate-950 shadow-sm"
-                  : "bg-white border-black/10 text-slate-700 hover:border-black/20"
-              }`}
-            >
-              <span className="block">구성원</span>
-              <span className="block mt-1 text-sm text-slate-500 font-semibold">
-                15문항
-              </span>
-            </button>
-            <button
-              onClick={() => setUserType("leader")}
-              className={`py-4 rounded-3xl font-semibold text-base transition-all duration-200 cursor-pointer border text-center ${
-                userType === "leader"
-                  ? "bg-white border-[color:var(--key-primary)] text-slate-950 shadow-sm"
-                  : "bg-white border-black/10 text-slate-700 hover:border-black/20"
-              }`}
-            >
-              <span className="block">리더</span>
-              <span className="block mt-1 text-sm text-slate-500 font-semibold">
-                20문항
-              </span>
-            </button>
-          </div>
-
           <button
             onClick={onStart}
-            disabled={!userType || !isSessionValid}
-            className={`w-full py-4 rounded-3xl font-bold text-lg transition-all duration-200 cursor-pointer mt-2 ${
-              userType && isSessionValid
-                ? "bg-[color:var(--key-primary)] text-white hover:opacity-90 shadow-sm"
+            disabled={!isSessionValid}
+            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-all duration-200 cursor-pointer flex items-center justify-between ${
+              isSessionValid
+                ? "bg-gradient-to-r from-[#EA002C] to-[#FF5A00] text-white hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(234,0,44,0.9)] border border-[#d70028]/40"
                 : "bg-slate-200 text-slate-400 cursor-not-allowed"
             }`}
           >
-            나의 캐릭터 확인하기
+            <span>캐릭터 확인</span>
+            <span className="text-white/90">→</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onGoCanvasForm}
+            className="w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-all duration-200 bg-gradient-to-r from-[#FF5A00] to-[#FF7A00] text-white border border-orange-500/50 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(255,90,0,0.9)] flex items-center justify-between"
+          >
+            <span>캔버스 기입</span>
+            <span className="text-white/90">✍️</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onGoLeaderForm}
+            className="w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-all duration-200 bg-gradient-to-r from-[#D9251D] to-[#EA002C] text-white border border-rose-600/40 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(217,37,29,0.9)] flex items-center justify-between"
+          >
+            리더에게
+            <span className="text-white/90">💬</span>
           </button>
         </div>
       </div>
