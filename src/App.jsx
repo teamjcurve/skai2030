@@ -13,6 +13,7 @@ import Question from "./components/Question";
 import Loading from "./components/Loading";
 import Result from "./components/Result";
 import OpenFeedbackForm from "./components/OpenFeedbackForm";
+import AiColleagueForm from "./components/AiColleagueForm";
 import { questions as allQuestions } from "./data/questions";
 import {
   INITIAL_MEMBER_SCORE,
@@ -256,6 +257,10 @@ export default function App() {
     navigate("/open-feedback/leader");
   };
 
+  const handleGoAiColleagueForm = () => {
+    navigate("/ai-colleague");
+  };
+
   function applyOptionDelta(member, option, delta) {
     const nextMember = { ...member };
     if (option?.skill) nextMember[option.skill] += delta;
@@ -350,6 +355,7 @@ export default function App() {
             onStart={handleStart}
             onGoCanvasForm={handleGoCanvasForm}
             onGoLeaderForm={handleGoLeaderForm}
+            onGoAiColleagueForm={handleGoAiColleagueForm}
           />
         }
       />
@@ -360,6 +366,10 @@ export default function App() {
       <Route
         path="/open-feedback/leader"
         element={<OpenFeedbackForm mode="leader" sessionId={sessionId} />}
+      />
+      <Route
+        path="/ai-colleague"
+        element={<AiColleagueForm sessionId={sessionId} />}
       />
       <Route path="/guide" element={<Intro onProceed={handleProceedIntro} />} />
       <Route

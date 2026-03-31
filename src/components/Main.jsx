@@ -2,6 +2,7 @@ export default function Main({
   onStart,
   onGoCanvasForm,
   onGoLeaderForm,
+  onGoAiColleagueForm,
   sessionCode,
   setSessionCode,
   onValidateSession,
@@ -105,34 +106,75 @@ export default function Main({
           </div>
 
           <button
+            type="button"
             onClick={onStart}
             disabled={!isSessionValid}
-            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-all duration-200 cursor-pointer flex items-center justify-between ${
+            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
               isSessionValid
-                ? "bg-gradient-to-r from-[#EA002C] to-[#FF5A00] text-white hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(234,0,44,0.9)] border border-[#d70028]/40"
-                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                ? "main-cta-reveal main-cta-reveal-d0 cursor-pointer bg-gradient-to-r from-[#EA002C] to-[#FF5A00] text-white hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(234,0,44,0.9)] border border-[#d70028]/40 active:scale-[0.99]"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
             }`}
           >
             <span>캐릭터 확인</span>
-            <span className="text-white/90">→</span>
+            <span
+              className={isSessionValid ? "text-white/90" : "text-slate-400"}
+            >
+              →
+            </span>
           </button>
 
           <button
             type="button"
             onClick={onGoCanvasForm}
-            className="w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-all duration-200 bg-gradient-to-r from-[#FF5A00] to-[#FF7A00] text-white border border-orange-500/50 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(255,90,0,0.9)] flex items-center justify-between"
+            disabled={!isSessionValid}
+            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
+              isSessionValid
+                ? "main-cta-reveal main-cta-reveal-d1 cursor-pointer bg-gradient-to-r from-[#FF5A00] to-[#FF7A00] text-white border border-orange-500/50 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(255,90,0,0.9)] active:scale-[0.99]"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
+            }`}
           >
             <span>캔버스 기입</span>
-            <span className="text-white/90">✍️</span>
+            <span
+              className={isSessionValid ? "text-white/90" : "text-slate-400"}
+            >
+              ✍️
+            </span>
           </button>
 
           <button
             type="button"
             onClick={onGoLeaderForm}
-            className="w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-all duration-200 bg-gradient-to-r from-[#D9251D] to-[#EA002C] text-white border border-rose-600/40 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(217,37,29,0.9)] flex items-center justify-between"
+            disabled={!isSessionValid}
+            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
+              isSessionValid
+                ? "main-cta-reveal main-cta-reveal-d2 cursor-pointer bg-gradient-to-r from-[#D9251D] to-[#EA002C] text-white border border-rose-600/40 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(217,37,29,0.9)] active:scale-[0.99]"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
+            }`}
           >
             리더에게
-            <span className="text-white/90">💬</span>
+            <span
+              className={isSessionValid ? "text-white/90" : "text-slate-400"}
+            >
+              💬
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onGoAiColleagueForm}
+            disabled={!isSessionValid}
+            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
+              isSessionValid
+                ? "main-cta-reveal main-cta-reveal-d3 cursor-pointer bg-gradient-to-r from-[#4F46E5] to-[#6366F1] text-white border border-indigo-500/40 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(79,70,229,0.75)] active:scale-[0.99]"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
+            }`}
+          >
+            <span>AI 동료에게</span>
+            <span
+              className={isSessionValid ? "text-white/90" : "text-slate-400"}
+            >
+              🤖
+            </span>
           </button>
         </div>
       </div>

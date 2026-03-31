@@ -89,6 +89,46 @@ body {
   animation: fade-in 0.2s ease-out;
 }
 
+/* Main: 차수 코드 확인 후 CTA 4개 순차 등장 */
+@keyframes main-cta-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+    filter: brightness(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+.main-cta-reveal {
+  animation: main-cta-reveal 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.main-cta-reveal-d0 {
+  animation-delay: 0ms;
+}
+.main-cta-reveal-d1 {
+  animation-delay: 0.07s;
+}
+.main-cta-reveal-d2 {
+  animation-delay: 0.14s;
+}
+.main-cta-reveal-d3 {
+  animation-delay: 0.21s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-cta-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #1f2933 #020617;
