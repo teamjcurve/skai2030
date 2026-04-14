@@ -4,6 +4,7 @@ create table if not exists public.ai_colleague_profiles (
   session_id uuid references public.sessions (id) on delete set null,
   colleague_name text not null,
   colleague_role text not null,
+  expected_outcomes text not null,
   background_context text not null,
   do_and_donts text not null,
   created_at timestamptz not null default timezone('utc', now())

@@ -5,6 +5,7 @@ import { supabase } from "../supabaseClient";
 const INITIAL = {
   colleague_name: "",
   colleague_role: "",
+  expected_outcomes: "",
   background_context: "",
   do_and_donts: "",
 };
@@ -40,6 +41,7 @@ export default function AiColleagueForm({ sessionId }) {
     if (
       !form.colleague_name.trim() ||
       !form.colleague_role.trim() ||
+      !form.expected_outcomes.trim() ||
       !form.background_context.trim() ||
       !form.do_and_donts.trim()
     ) {
@@ -53,6 +55,7 @@ export default function AiColleagueForm({ sessionId }) {
         session_id: sessionId,
         colleague_name: form.colleague_name.trim(),
         colleague_role: form.colleague_role.trim(),
+        expected_outcomes: form.expected_outcomes.trim(),
         background_context: form.background_context.trim(),
         do_and_donts: form.do_and_donts.trim(),
       };
@@ -81,16 +84,16 @@ export default function AiColleagueForm({ sessionId }) {
       <div className="mx-auto w-full max-w-md px-5 pt-10 pb-8">
         <div className="w-full rounded-3xl bg-white p-6 shadow-sm border border-black/5">
           <h1 className="text-2xl font-extrabold tracking-tight leading-snug text-slate-950">
-            AI 동료에게
+            워크플로우 재설계
           </h1>
           <p className="text-slate-600 text-sm leading-relaxed mt-2">
-            함께 일할 AI 동료의 이름, 역할, 맥락, 그리고 지켜 주었으면 하는
-            행동을 적어 주세요. 제출 내용은 차수별로 안전하게 저장됩니다.
+            AI 동료 설정에 필요한 항목을 작성해 주세요. 제출 내용은 차수별로
+            안전하게 저장됩니다.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-4">
             <FieldLabel
-              text="AI 동료 이름"
+              text="AI 동료의 이름"
               required
               example="예) 박원인TL, 김정산봇, 이캘린더 대리"
             />
@@ -102,9 +105,9 @@ export default function AiColleagueForm({ sessionId }) {
             />
 
             <FieldLabel
-              text="AI 동료의 역할"
+              text="위임 업무 및 기대하는 역할"
               required
-              example="예) 회의록 정리, 초안 작성, 데이터 해석 지원"
+              example="예) 회의록 정리, 초안 작성, 데이터 해석 지원 등 맡기는 일과 기대 역할"
             />
             <textarea
               value={form.colleague_role}
@@ -114,9 +117,21 @@ export default function AiColleagueForm({ sessionId }) {
             />
 
             <FieldLabel
-              text="AI 동료에게 전달할 배경지식/맥락"
+              text="업무 결과물 및 예상되는 효과"
               required
-              example="예) 우리 팀 산업, 용어 정의, 현재 진행 중인 과제"
+              example="예) 주간 리포트 초안, 의사결정 시간 단축, 반복 업무 30% 절감 등"
+            />
+            <textarea
+              value={form.expected_outcomes}
+              onChange={handleChange("expected_outcomes")}
+              rows={3}
+              className="w-full rounded-2xl bg-[#f6f7f9] border border-black/10 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[color:var(--key-primary)] focus:ring-2 focus:ring-[color:var(--key-primary)]/15 resize-y"
+            />
+
+            <FieldLabel
+              text="배경지식 및 참고자료"
+              required
+              example="예) 우리 팀 산업, 용어 정의, 현재 진행 중인 과제, 참고 링크·문서"
             />
             <textarea
               value={form.background_context}
@@ -126,7 +141,7 @@ export default function AiColleagueForm({ sessionId }) {
             />
 
             <FieldLabel
-              text="AI 동료의 Do & Don'ts"
+              text="Do & Don'ts"
               required
               example="예) Do: 출처를 항상 표기 / Don't: 확정되지 않은 정보를 사실처럼 말하지 말 것"
             />

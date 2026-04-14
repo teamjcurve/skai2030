@@ -14,6 +14,7 @@ import Loading from "./components/Loading";
 import Result from "./components/Result";
 import OpenFeedbackForm from "./components/OpenFeedbackForm";
 import AiColleagueForm from "./components/AiColleagueForm";
+import PromptSetPage from "./components/PromptSetPage";
 import { questions as allQuestions } from "./data/questions";
 import {
   INITIAL_MEMBER_SCORE,
@@ -249,12 +250,12 @@ export default function App() {
     navigate("/questions/1");
   };
 
-  const handleGoCanvasForm = () => {
-    navigate("/open-feedback/canvas");
+  const handleGoPromptSet = () => {
+    navigate("/prompt-set");
   };
 
-  const handleGoLeaderForm = () => {
-    navigate("/open-feedback/leader");
+  const handleGoCanvasForm = () => {
+    navigate("/open-feedback/canvas");
   };
 
   const handleGoAiColleagueForm = () => {
@@ -353,12 +354,13 @@ export default function App() {
             isValidatingSession={isValidatingSession}
             sessionError={sessionError}
             onStart={handleStart}
+            onGoPromptSet={handleGoPromptSet}
             onGoCanvasForm={handleGoCanvasForm}
-            onGoLeaderForm={handleGoLeaderForm}
             onGoAiColleagueForm={handleGoAiColleagueForm}
           />
         }
       />
+      <Route path="/prompt-set" element={<PromptSetPage />} />
       <Route
         path="/open-feedback/canvas"
         element={<OpenFeedbackForm mode="canvas" sessionId={sessionId} />}

@@ -1,7 +1,30 @@
+function MainCtaArrowIcon({ active }) {
+  return (
+    <span
+      className={active ? "text-white/90" : "text-slate-400"}
+      aria-hidden
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.25}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-[1.25rem] h-[1.25rem] shrink-0"
+      >
+        <path d="M5 12h14" />
+        <path d="M13 5l7 7-7 7" />
+      </svg>
+    </span>
+  );
+}
+
 export default function Main({
   onStart,
+  onGoPromptSet,
   onGoCanvasForm,
-  onGoLeaderForm,
   onGoAiColleagueForm,
   sessionCode,
   setSessionCode,
@@ -111,16 +134,26 @@ export default function Main({
             disabled={!isSessionValid}
             className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
               isSessionValid
-                ? "main-cta-reveal main-cta-reveal-d0 cursor-pointer bg-gradient-to-r from-[#EA002C] to-[#FF5A00] text-white hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(234,0,44,0.9)] border border-[#d70028]/40 active:scale-[0.99]"
+                ? "main-cta-reveal main-cta-reveal-d0 cursor-pointer bg-gradient-to-r from-[#DC2626] to-[#FB7185] text-white hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(220,38,38,0.75)] border border-rose-400/45 active:scale-[0.99]"
                 : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
             }`}
           >
             <span>캐릭터 확인</span>
-            <span
-              className={isSessionValid ? "text-white/90" : "text-slate-400"}
-            >
-              →
-            </span>
+            <MainCtaArrowIcon active={isSessionValid} />
+          </button>
+
+          <button
+            type="button"
+            onClick={onGoPromptSet}
+            disabled={!isSessionValid}
+            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
+              isSessionValid
+                ? "main-cta-reveal main-cta-reveal-d1 cursor-pointer bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white border border-fuchsia-400/40 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(124,58,237,0.65)] active:scale-[0.99]"
+                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
+            }`}
+          >
+            <span>프롬프트 세트</span>
+            <MainCtaArrowIcon active={isSessionValid} />
           </button>
 
           <button
@@ -129,34 +162,12 @@ export default function Main({
             disabled={!isSessionValid}
             className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
               isSessionValid
-                ? "main-cta-reveal main-cta-reveal-d1 cursor-pointer bg-gradient-to-r from-[#FF5A00] to-[#FF7A00] text-white border border-orange-500/50 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(255,90,0,0.9)] active:scale-[0.99]"
+                ? "main-cta-reveal main-cta-reveal-d2 cursor-pointer bg-gradient-to-r from-[#0D9488] to-[#22C55E] text-white border border-emerald-400/45 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(13,148,136,0.65)] active:scale-[0.99]"
                 : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
             }`}
           >
             <span>캔버스 기입</span>
-            <span
-              className={isSessionValid ? "text-white/90" : "text-slate-400"}
-            >
-              ✍️
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onGoLeaderForm}
-            disabled={!isSessionValid}
-            className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
-              isSessionValid
-                ? "main-cta-reveal main-cta-reveal-d2 cursor-pointer bg-gradient-to-r from-[#D9251D] to-[#EA002C] text-white border border-rose-600/40 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(217,37,29,0.9)] active:scale-[0.99]"
-                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
-            }`}
-          >
-            리더에게
-            <span
-              className={isSessionValid ? "text-white/90" : "text-slate-400"}
-            >
-              💬
-            </span>
+            <MainCtaArrowIcon active={isSessionValid} />
           </button>
 
           <button
@@ -165,16 +176,12 @@ export default function Main({
             disabled={!isSessionValid}
             className={`w-full py-4 px-5 rounded-3xl font-extrabold text-base transition-[transform,box-shadow,filter] duration-200 flex items-center justify-between ${
               isSessionValid
-                ? "main-cta-reveal main-cta-reveal-d3 cursor-pointer bg-gradient-to-r from-[#4F46E5] to-[#6366F1] text-white border border-indigo-500/40 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(79,70,229,0.75)] active:scale-[0.99]"
+                ? "main-cta-reveal main-cta-reveal-d3 cursor-pointer bg-gradient-to-r from-[#2563EB] to-[#06B6D4] text-white border border-sky-400/45 hover:opacity-95 shadow-[0_12px_26px_-12px_rgba(37,99,235,0.6)] active:scale-[0.99]"
                 : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
             }`}
           >
-            <span>AI 동료에게</span>
-            <span
-              className={isSessionValid ? "text-white/90" : "text-slate-400"}
-            >
-              🤖
-            </span>
+            <span>워크플로우 재설계</span>
+            <MainCtaArrowIcon active={isSessionValid} />
           </button>
         </div>
       </div>

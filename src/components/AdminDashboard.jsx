@@ -242,21 +242,21 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
+    if (!selectedSessionId) {
+      setResults([]);
+      return;
+    }
+
     let isCancelled = false;
     const fetchResults = async () => {
       setIsLoadingResults(true);
       setError("");
       try {
-        let query = supabase
+        const { data, error: err } = await supabase
           .from("results")
           .select("id, session_id, user_type, result_code, leader_badge, created_at")
+          .eq("session_id", selectedSessionId)
           .order("created_at", { ascending: true });
-
-        if (selectedSessionId) {
-          query = query.eq("session_id", selectedSessionId);
-        }
-
-        const { data, error: err } = await query;
 
         if (err) throw err;
         if (!isCancelled) {
@@ -277,23 +277,20 @@ export default function AdminDashboard() {
 
     fetchResults();
 
-    const channelName = selectedSessionId
-      ? `results-session-${selectedSessionId}`
-      : "results-all";
-    const channelConfig = {
-      event: "INSERT",
-      schema: "public",
-      table: "results",
-    };
-    if (selectedSessionId) {
-      channelConfig.filter = `session_id=eq.${selectedSessionId}`;
-    }
-
     const channel = supabase
-      .channel(channelName)
-      .on("postgres_changes", channelConfig, (payload) => {
-        setResults((prev) => [...prev, payload.new]);
-      })
+      .channel(`results-session-${selectedSessionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "results",
+          filter: `session_id=eq.${selectedSessionId}`,
+        },
+        (payload) => {
+          setResults((prev) => [...prev, payload.new]);
+        },
+      )
       .subscribe();
 
     return () => {
