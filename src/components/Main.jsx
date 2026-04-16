@@ -152,7 +152,7 @@ export default function Main({
                 : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200/80"
             }`}
           >
-            <span>프롬프트 세트</span>
+            <span>AI Native 이미지 생성</span>
             <MainCtaArrowIcon active={isSessionValid} />
           </button>
 
