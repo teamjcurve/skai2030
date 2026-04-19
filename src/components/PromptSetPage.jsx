@@ -1,32 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const JOB_ROLES = [
-  { ko: "반도체 설계", en: "Semiconductor Design & Architecture" },
-  { ko: "공정 관리", en: "Process Management & Yield Optimization" },
-  { ko: "전략 기획", en: "Strategic Planning & Business Operation" },
-  { ko: "데이터 분석", en: "Data Analysis & AI Modeling" },
-  { ko: "HR & 조직개발", en: "Human Resources & Organizational Development" },
-  { ko: "품질 관리", en: "Quality Assurance & Reliability Engineering" },
-  { ko: "연구 개발 (R&D)", en: "Research & Development Innovation" },
-  { ko: "제품 기획", en: "Product Planning & Roadmap Strategy" },
-  { ko: "마케팅 & 세일즈", en: "Marketing & Global Sales" },
-  { ko: "IT 인프라", en: "IT Infrastructure & System Engineering" },
-  { ko: "재무 & 회계", en: "Finance & Accounting Management" },
-  { ko: "소프트웨어 개발", en: "Software Engineering & Development" },
-  { ko: "구매 & 조달", en: "Procurement & Supply Chain Management" },
-  { ko: "설비 관리", en: "Equipment & Facility Management" },
-  { ko: "생산 관리", en: "Production Management & Manufacturing" },
-  { ko: "법무 & 컴플라이언스", en: "Legal Affairs & Compliance" },
-  { ko: "환경 안전 (EHS)", en: "Environmental Health & Safety" },
-  { ko: "고객 지원 & CX", en: "Customer Experience & Technical Support" },
-  { ko: "지적재산권 관리", en: "Intellectual Property Management" },
-  { ko: "패키징 & 테스트", en: "Semiconductor Packaging & Testing" },
-];
-
-/** 드롭다운 '기타' 선택 시 직접 입력과 매칭되는 값 */
-const JOB_OTHER = "기타";
-
 const CORE_SKILLS = [
   { ko: "회복탄력성 및 민첩성", en: "Resilience & Agility", char: "다이내믹 서퍼" },
   { ko: "AI 및 빅데이터 활용", en: "AI & Big Data Utilization", char: "디지털 오라클" },
@@ -41,22 +15,58 @@ const CORE_SKILLS = [
   { ko: "공감 및 적극적 경청", en: "Empathy & Active Listening", char: "하트 핑퐁" },
 ];
 
-const TASK_EXAMPLES = [
-  { ko: "DRAM 설계 및 시뮬레이션", en: "DRAM design and simulation" },
-  { ko: "낸드(NAND) 플래시 설계·개발", en: "NAND flash design and development" },
-  { ko: "HBM·고대역폭 패키징 기술", en: "HBM and high-bandwidth packaging technology" },
-  { ko: "반도체 장비 구매·조달", en: "Semiconductor equipment procurement and sourcing" },
-  { ko: "수율 예측 시스템 구축", en: "Building yield prediction systems" },
-  { ko: "웨이퍼 공정 조건 최적화", en: "Optimizing wafer process conditions" },
-  { ko: "클린룸·FAB 생산 운영", en: "Cleanroom and fab production operations" },
-  { ko: "메모리 신뢰성·품질 검증", en: "Memory reliability and quality verification" },
-  { ko: "차세대 메모리 기술 연구", en: "Researching next-generation memory technologies" },
-  { ko: "공정 장비 유지보수·교정", en: "Process equipment maintenance and calibration" },
-  { ko: "반도체 제조 데이터 분석", en: "Analyzing semiconductor manufacturing data" },
-  { ko: "원재료·부품 공급망 관리", en: "Managing materials and component supply chains" },
-  { ko: "글로벌 고객 기술 지원", en: "Providing global customer technical support" },
-  { ko: "스마트 팩토리·자동화 구축", en: "Implementing smart factory and automation solutions" },
-];
+/**
+ * STEP 1 캐릭터명(한글) → 이미지용 "한 컷 장면" 묘사 (영문)
+ * 단순한 라벨이 아니라 자세·소품·동작·환경까지 구체화해 모델이 시각적으로 가르도록 한다.
+ */
+const SKILL_CHAR_TO_VISUAL_ROLE = {
+  "다이내믹 서퍼":
+    "a fearless surfer carving across crashing waves of glowing digital light, board cutting bright trails of neon spray, body leaning into the speed with arms wide",
+  "데이터 연금술사":
+    "an alchemist hunched over a bubbling cauldron of luminescent data, distilling glowing potions of insight, runes of code and floating equations swirling around them",
+  "디지털 오라클":
+    "an oracle seated before a giant floating crystal sphere, prophetic visions of futures swirling within, eyes glowing softly with foresight, ancient symbols hovering nearby",
+  "아이디어 스파크":
+    "a creative wizard with arms thrown wide, brilliant lightning-bolts of ideas erupting from their fingertips, sparks of innovation scattering across the entire scene",
+  "테크 플루언트":
+    "a starship navigator standing at the helm of a holographic console, charting paths through living constellations of code, glowing UI panels bending around them",
+  "컬처 크리에이터":
+    "a grand conductor on a vast podium, baton raised mid-gesture, harmonizing flowing rivers of multicolored light and people-shaped silhouettes into a symphony",
+  "지적 유목민":
+    "a robed explorer wandering through endless floating archives, books and scrolls and holographic libraries suspended in a cosmic void around them",
+  "매크로 렌즈":
+    "a cosmic navigator overseeing a vast holographic map of interconnected systems, zooming fluidly between atoms and galaxies, multiple scales visible at once",
+  "포텐셜 부스터":
+    "an energy weaver with hands outstretched toward surrounding silhouettes, awakening dormant glowing potentials inside each one, light blooming from their chests",
+  "코어 모티베이터":
+    "a radiant lighthouse beacon piercing through a digital storm, leading silhouettes of teammates toward the light, rays cutting through dark clouds",
+  "하트 핑퐁":
+    "an empathic guardian gently cupping a glowing heart of artificial consciousness, their pulses syncing in perfect rhythm, soft warm light pulsing between them",
+};
+
+const hasKorean = (text) => /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(text);
+
+/**
+ * 유저 직접 입력 강점을 영문 시각 역할로 변환.
+ * - 한글이 섞여 있으면 "Specialist" 풍의 안전한 라벨로 대체하고
+ *   원문은 따옴표로 함께 남겨 AI가 번역해 해석하도록 힌트를 준다.
+ * - 영문 입력은 그대로 유지.
+ */
+function customStrengthToVisualRole(raw) {
+  const text = String(raw ?? "").trim();
+  if (!text) return "";
+  if (hasKorean(text)) return `Visionary Specialist embodying "${text}"`;
+  return text;
+}
+
+/** 영문 구절 배열을 자연스러운 나열로 합침 (복수 선택 시 comma + and) */
+function joinEnglishList(parts) {
+  const filtered = parts.map((s) => String(s).trim()).filter(Boolean);
+  if (filtered.length === 0) return "";
+  if (filtered.length === 1) return filtered[0];
+  if (filtered.length === 2) return `${filtered[0]} and ${filtered[1]}`;
+  return `${filtered.slice(0, -1).join(", ")}, and ${filtered[filtered.length - 1]}`;
+}
 
 const MOOD_KEYWORDS = [
   { ko: "속도", en: "Dynamic motion blur, pulsing light trails, high-speed evolution" },
@@ -85,13 +95,31 @@ const IMAGE_TYPES = [
   },
 ];
 
+/**
+ * STEP 3: AI Native로 만들어낼 결과·임팩트 — '나' 관점의 개인 임팩트 (다중 선택 가능)
+ * 영문은 캐릭터 주변에서 일어나는 "시각 현상"으로 작성해, 템플릿의 "with ..." 구문 뒤에 자연스럽게 합성된다.
+ */
+const OUTCOME_OPTIONS = [
+  { ko: "의사결정 속도 향상", en: "decision paths illuminating instantly like flashes of lightning around them" },
+  { ko: "반복 업무 자동화", en: "swarms of tiny luminous AI agent figures absorbing repetitive task icons like glowing fireflies" },
+  { ko: "창의·전략 시간 확보", en: "a vast halo of open creative space around them, floating sketches of fresh ideas drifting freely" },
+  { ko: "고품질 인사이트 도출", en: "brilliant gem-like insights crystallizing from streams of raw data flowing past their hands" },
+  { ko: "업무 생산성 향상", en: "dozens of glowing tasks completing themselves in rapid bursts of light around them" },
+  { ko: "산출물 품질 향상", en: "their finished works displayed in midair, each piece radiating exquisite craft and luminous detail" },
+  { ko: "새로운 비즈니스 가치 창출", en: "new luminous worlds and possibilities blooming forth from their gestures" },
+  { ko: "빠른 학습·성장", en: "branches of knowledge visibly growing and evolving around them in real time" },
+  { ko: "데이터 기반 의사결정", en: "translucent data dashboards and predictive charts materializing precisely when needed" },
+  { ko: "삶의 여유 회복", en: "soft golden warm light spilling around them, peaceful breath visible in the air" },
+  { ko: "일의 본질에 집중", en: "all distractions fading to soft mist, only the essential glowing brightly before them" },
+];
+
 const AI_TOOLS = [
   { name: "ChatGPT", href: "https://chatgpt.com", desc: "이미지 생성 추천" },
   { name: "Gemini", href: "https://gemini.google.com", desc: "이미지 생성 추천" },
   { name: "Arena AI", href: "https://lmarena.ai", desc: "다양한 모델 비교" },
 ];
 
-const hasKorean = (text) => /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(text);
+const TOTAL_STEPS = 4;
 
 function StepBadge({ step, total }) {
   return (
@@ -122,23 +150,6 @@ function Chip({ selected, onClick, children, sub }) {
       {selected && (
         <span className="absolute top-1.5 right-2 text-violet-500 text-xs">✓</span>
       )}
-    </button>
-  );
-}
-
-function MiniChip({ selected, onClick, children }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-xl px-3 py-2 text-[13px] font-semibold transition-all duration-200 border-2 ${
-        selected
-          ? "bg-gradient-to-br from-violet-50 to-fuchsia-50 border-violet-400 text-violet-800 shadow-[0_3px_10px_-4px_rgba(124,58,237,0.35)] scale-[1.02]"
-          : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 active:scale-[0.97]"
-      }`}
-    >
-      {selected && <span className="mr-1 text-violet-500">✓</span>}
-      {children}
     </button>
   );
 }
@@ -174,12 +185,11 @@ export default function PromptSetPage() {
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
 
-  const [selectedJob, setSelectedJob] = useState("");
-  const [customJob, setCustomJob] = useState("");
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [customStrength, setCustomStrength] = useState("");
-  const [selectedTaskChips, setSelectedTaskChips] = useState([]);
-  const [customTask, setCustomTask] = useState("");
+  const [aiInsightsContext, setAiInsightsContext] = useState("");
+  const [selectedOutcomes, setSelectedOutcomes] = useState([]);
+  const [customOutcome, setCustomOutcome] = useState("");
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [selectedImageType, setSelectedImageType] = useState("");
   const [promptExpanded, setPromptExpanded] = useState(true);
@@ -195,27 +205,17 @@ export default function PromptSetPage() {
     );
   }, []);
 
-  const toggleTaskChip = useCallback((taskKo) => {
-    setSelectedTaskChips((prev) =>
-      prev.includes(taskKo) ? prev.filter((s) => s !== taskKo) : [...prev, taskKo]
-    );
-  }, []);
-
   const toggleMood = useCallback((moodKo) => {
     setSelectedMoods((prev) =>
       prev.includes(moodKo) ? prev.filter((m) => m !== moodKo) : [...prev, moodKo]
     );
   }, []);
 
-  const jobEn = useMemo(() => {
-    if (selectedJob === JOB_OTHER) return customJob.trim();
-    return JOB_ROLES.find((j) => j.ko === selectedJob)?.en ?? "";
-  }, [selectedJob, customJob]);
-
-  const skillsEn = useMemo(
-    () => selectedSkills.map((ko) => CORE_SKILLS.find((s) => s.ko === ko)?.en).filter(Boolean),
-    [selectedSkills]
-  );
+  const toggleOutcome = useCallback((outcomeKo) => {
+    setSelectedOutcomes((prev) =>
+      prev.includes(outcomeKo) ? prev.filter((o) => o !== outcomeKo) : [...prev, outcomeKo]
+    );
+  }, []);
 
   const moodsEn = useMemo(
     () => selectedMoods.map((ko) => MOOD_KEYWORDS.find((m) => m.ko === ko)?.en).filter(Boolean),
@@ -227,55 +227,108 @@ export default function PromptSetPage() {
     [selectedImageType]
   );
 
-  const taskEn = useMemo(() => {
-    const fromChips = selectedTaskChips
-      .map((ko) => TASK_EXAMPLES.find((t) => t.ko === ko)?.en)
+  /** STEP 1: 선택된 캐릭터명 → 시각 역할 + 직접 입력(한글이면 Specialist 안전 라벨)로 합쳐 영문 나열 */
+  const step1MappedValues = useMemo(() => {
+    const fromSkills = selectedSkills
+      .map((ko) => {
+        const skill = CORE_SKILLS.find((s) => s.ko === ko);
+        const char = skill?.char;
+        if (!char) return null;
+        return SKILL_CHAR_TO_VISUAL_ROLE[char] ?? skill.en;
+      })
       .filter(Boolean);
-    const custom = customTask.trim();
-    const parts = [...fromChips];
-    if (custom) parts.push(custom);
-    return parts.join("; ");
-  }, [selectedTaskChips, customTask]);
+    const customRole = customStrengthToVisualRole(customStrength);
+    const parts = [...fromSkills];
+    if (customRole) parts.push(customRole);
+    return joinEnglishList(parts);
+  }, [selectedSkills, customStrength]);
 
-  const strengthsText = useMemo(() => {
-    const parts = [...skillsEn];
-    if (customStrength.trim()) parts.push(customStrength.trim());
-    return parts.join(", ");
-  }, [skillsEn, customStrength]);
+  /** STEP 4: 분위기 키워드들을 자연스러운 영문 나열로 */
+  const step4Atmosphere = useMemo(
+    () => (moodsEn.length > 0 ? joinEnglishList(moodsEn) : ""),
+    [moodsEn]
+  );
+
+  /** STEP 2 (Vision) — 자유 텍스트, 국문 가능 */
+  const aiInsightsContextText = useMemo(() => aiInsightsContext.trim(), [aiInsightsContext]);
+
+  /** STEP 3 (Outcome) — chip 다중 선택 + 직접 추가 → 영문 시각 단서 나열 */
+  const outcomesEn = useMemo(
+    () =>
+      selectedOutcomes
+        .map((ko) => OUTCOME_OPTIONS.find((o) => o.ko === ko)?.en)
+        .filter(Boolean),
+    [selectedOutcomes]
+  );
+
+  const aiOutcomeContextText = useMemo(() => {
+    const parts = [...outcomesEn];
+    const custom = customOutcome.trim();
+    if (custom) {
+      parts.push(hasKorean(custom) ? `vivid impact embodied as "${custom}"` : custom);
+    }
+    return joinEnglishList(parts);
+  }, [outcomesEn, customOutcome]);
 
   const hasFreeKorean = useMemo(
     () =>
       hasKorean(customStrength) ||
-      hasKorean(customTask) ||
-      (selectedJob === JOB_OTHER && hasKorean(customJob)),
-    [customStrength, customTask, selectedJob, customJob]
+      hasKorean(aiInsightsContext) ||
+      hasKorean(customOutcome),
+    [customStrength, aiInsightsContext, customOutcome]
   );
 
   const generatedPrompt = useMemo(() => {
-    const imgPart = imageTypeEn || "[이미지 유형을 선택하세요]";
-    const jobPart = jobEn || "[직무를 선택하세요]";
-    const strengthPart = strengthsText || "[핵심 스킬 또는 강점을 입력하세요]";
-    const taskPart = taskEn || "[나의 업무를 입력하세요]";
-    const moodPart = moodsEn.length > 0 ? moodsEn.join(". ") : "[분위기 키워드를 선택하세요]";
+    const imageType = imageTypeEn || "[이미지 유형을 선택하세요]";
+    const step1ForPrompt = step1MappedValues || "[핵심 스킬 또는 강점을 입력하세요]";
+    const aiVision_from_Step2 =
+      aiInsightsContextText || "[내가 지향하는 AI Native 모습을 입력하세요]";
+    const aiOutcome_from_Step3 =
+      aiOutcomeContextText || "[AI Native로 만들어낼 결과·임팩트를 입력하세요]";
+    const step4ForPrompt = step4Atmosphere || "[분위기 키워드를 선택하세요]";
 
-    let prompt = `${imgPart}, portraying a professional expert at SK Hynix. The character represents an 'AI Native' identity.\n\nPersonal Identity: A top-tier specialist in ${jobPart}.\n\nStrengths & Focus: Driven by core strengths such as '${strengthPart}', currently focusing on '${taskPart}'.\n\nAtmosphere & Style: ${moodPart}. 8k resolution, highly detailed, Unreal Engine 5 aesthetic.`;
+    // 라벨드 섹션 구조 — 선택값(차별화 신호)을 앞쪽에 배치하고
+    // 정적 보일러플레이트는 제거. 단일 캐릭터임을 명시해 다중 선택 시 분신/혼란 방지.
+    let prompt = `${imageType}, a highly symbolic and metaphorical AI Native artwork. A single visionary character at the center of the composition.
+
+SUBJECT (one character, embodying the following role and action): ${step1ForPrompt}.
+
+VISIBLE IMPACT AROUND THEM (render these as concrete visual phenomena, not text): with ${aiOutcome_from_Step3}.
+
+ATMOSPHERE, LIGHTING & COLOR PALETTE: ${step4ForPrompt}.
+
+CORE IDENTITY KEYWORDS (interpret visually through the character's posture, aura and expression — do NOT render as literal text): "${aiVision_from_Step2}".
+
+RENDER STYLE: ${imageType}. Masterpiece, visually breathtaking, 8k resolution, highly detailed, cinematic lighting, dramatic composition, strong silhouette.
+
+NEGATIVE: avoid generic office worker, avoid literal cubicle or desk, avoid plain corporate stock-photo look, avoid text or watermarks in the image.`;
 
     if (hasFreeKorean) {
       prompt += `\n\n(Note: Some parts of this prompt contain Korean text. Please interpret and translate them into natural English meaning for image generation.)`;
     }
 
     return prompt;
-  }, [imageTypeEn, jobEn, strengthsText, taskEn, moodsEn, hasFreeKorean]);
+  }, [
+    imageTypeEn,
+    step1MappedValues,
+    aiInsightsContextText,
+    aiOutcomeContextText,
+    step4Atmosphere,
+    hasFreeKorean,
+  ]);
 
-  const isComplete = imageTypeEn && jobEn && strengthsText && taskEn && moodsEn.length > 0;
+  const isComplete =
+    Boolean(imageTypeEn) &&
+    Boolean(step1MappedValues) &&
+    Boolean(aiInsightsContextText) &&
+    Boolean(aiOutcomeContextText) &&
+    moodsEn.length > 0;
 
   const completedSteps = [
-    selectedJob &&
-      (selectedJob !== JOB_OTHER || customJob.trim()),
     selectedSkills.length > 0 || customStrength.trim(),
-    taskEn,
-    selectedMoods.length > 0,
-    selectedImageType,
+    aiInsightsContextText,
+    selectedOutcomes.length > 0 || customOutcome.trim(),
+    selectedMoods.length > 0 && selectedImageType,
   ].filter(Boolean).length;
 
   const copyPrompt = useCallback(async () => {
@@ -322,73 +375,17 @@ export default function PromptSetPage() {
             <div className="flex-1 h-1.5 rounded-full bg-white/20 overflow-hidden">
               <div
                 className="h-full rounded-full bg-white/90 transition-all duration-500"
-                style={{ width: `${(completedSteps / 5) * 100}%` }}
+                style={{ width: `${(completedSteps / TOTAL_STEPS) * 100}%` }}
               />
             </div>
-            <span className="text-xs font-bold text-white/70">{completedSteps}/5</span>
+            <span className="text-xs font-bold text-white/70">{completedSteps}/{TOTAL_STEPS}</span>
           </div>
         </section>
 
-        {/* ── STEP 1: 직무 선택 ── */}
-        <section className="rounded-3xl bg-white p-5 shadow-sm border border-black/5">
-          <div className="flex items-center gap-2 mb-3">
-            <StepBadge step={1} total={5} />
-            <h2 className="text-base font-extrabold text-slate-900">직무 선택</h2>
-          </div>
-          <p className="text-sm text-slate-500 mb-3">회사 내 나의 직무를 선택해주세요</p>
-          <select
-            value={selectedJob}
-            onChange={(e) => {
-              const v = e.target.value;
-              setSelectedJob(v);
-              if (v !== JOB_OTHER) setCustomJob("");
-            }}
-            className={`w-full rounded-2xl border-2 px-4 py-3.5 text-sm font-semibold transition-colors appearance-none bg-no-repeat bg-[length:16px] bg-[center_right_14px] ${
-              selectedJob
-                ? "border-violet-400 bg-violet-50/50 text-violet-900"
-                : "border-slate-200 bg-[#f6f7f9] text-slate-500"
-            }`}
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E")`,
-            }}
-          >
-            <option value="">직무를 선택하세요</option>
-            {JOB_ROLES.map((j) => (
-              <option key={j.ko} value={j.ko}>{j.ko}</option>
-            ))}
-            <option value={JOB_OTHER}>{JOB_OTHER}</option>
-          </select>
-          {selectedJob === JOB_OTHER && (
-            <div className="mt-3">
-              <label className="block text-sm font-bold text-slate-700 mb-2">
-                직무 직접 입력
-              </label>
-              <input
-                type="text"
-                value={customJob}
-                onChange={(e) => setCustomJob(e.target.value)}
-                placeholder="예: 반도체 장비 엔지니어링, 글로벌 SCM"
-                className="w-full rounded-2xl border-2 border-slate-200 bg-[#f6f7f9] px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-violet-400 focus:bg-violet-50/30 transition-colors"
-              />
-              {customJob.trim() && hasKorean(customJob) && (
-                <p className="mt-1.5 text-xs text-amber-600 font-medium">
-                  한국어가 감지되었습니다. 프롬프트에 AI 자동 번역 지시가 추가됩니다.
-                </p>
-              )}
-            </div>
-          )}
-          {selectedJob && selectedJob !== JOB_OTHER && (
-            <p className="mt-2 text-xs text-violet-500 font-medium">→ {jobEn}</p>
-          )}
-          {selectedJob === JOB_OTHER && customJob.trim() && (
-            <p className="mt-2 text-xs text-violet-500 font-medium break-words">→ {jobEn}</p>
-          )}
-        </section>
-
-        {/* ── STEP 2: 핵심 스킬 & 강점 ── */}
+        {/* ── STEP 1: 핵심 스킬 & 강점 ── */}
         <section className="rounded-3xl bg-white p-5 shadow-sm border border-black/5">
           <div className="flex items-center gap-2 mb-1">
-            <StepBadge step={2} total={5} />
+            <StepBadge step={1} total={TOTAL_STEPS} />
             <h2 className="text-base font-extrabold text-slate-900">핵심 스킬 & 강점 (복수 선택 가능)</h2>
           </div>
 
@@ -406,10 +403,10 @@ export default function PromptSetPage() {
             ))}
           </div>
 
-          {selectedSkills.length > 0 && (
+          {(selectedSkills.length > 0 || customStrength.trim()) && step1MappedValues && (
             <div className="mb-4 p-3 rounded-xl bg-violet-50/60 border border-violet-100">
               <p className="text-xs text-violet-600 leading-relaxed">
-                → {skillsEn.join(", ")}
+                → {step1MappedValues}
               </p>
             </div>
           )}
@@ -433,44 +430,78 @@ export default function PromptSetPage() {
           </div>
         </section>
 
-        {/* ── STEP 3: 나의 업무 ── */}
+        {/* ── STEP 2: 내가 지향하는 AI Native 모습 (Vision) ── */}
         <section className="rounded-3xl bg-white p-5 shadow-sm border border-black/5">
           <div className="flex items-center gap-2 mb-1">
-            <StepBadge step={3} total={5} />
-            <h2 className="text-base font-extrabold text-slate-900">나의 업무 (복수 선택 가능)</h2>
+            <StepBadge step={2} total={TOTAL_STEPS} />
+            <h2 className="text-base font-extrabold text-slate-900">나의 AI Native</h2>
           </div>
-          <div className="flex flex-wrap gap-1.5 mb-4 mt-3">
-            {TASK_EXAMPLES.map((t) => (
-              <MiniChip
-                key={t.ko}
-                selected={selectedTaskChips.includes(t.ko)}
-                onClick={() => toggleTaskChip(t.ko)}
+          <p className="text-sm text-slate-500 mb-3 leading-relaxed">
+            내가 지향하는 나만의 AI Native 모습을 작성해주세요.
+          </p>
+          <textarea
+            value={aiInsightsContext}
+            onChange={(e) => setAiInsightsContext(e.target.value)}
+            placeholder={`예) AI 명인, 디지털 마에스트로, AI 에이전트 지휘자,\n손짓 하나로 워크플로우를 움직이는 사람`}
+            rows={4}
+            className="w-full rounded-2xl border-2 border-slate-200 bg-[#f6f7f9] px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-violet-400 focus:bg-violet-50/30 transition-colors resize-y leading-relaxed"
+          />
+          {aiInsightsContextText && hasKorean(aiInsightsContextText) && (
+            <p className="mt-1.5 text-xs text-amber-600 font-medium">
+              한국어가 감지되었습니다. 프롬프트에 AI 자동 번역 지시가 추가됩니다.
+            </p>
+          )}
+          {aiInsightsContextText && (
+            <div className="mt-3 p-3 rounded-xl bg-violet-50/60 border border-violet-100">
+              <p className="text-xs text-violet-600 leading-relaxed break-words whitespace-pre-wrap">
+                → {aiInsightsContextText}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* ── STEP 3: 만들어낼 결과·임팩트 (Outcome, 다중 선택) ── */}
+        <section className="rounded-3xl bg-white p-5 shadow-sm border border-black/5">
+          <div className="flex items-center gap-2 mb-1">
+            <StepBadge step={3} total={TOTAL_STEPS} />
+            <h2 className="text-base font-extrabold text-slate-900">결과·임팩트 (복수 선택 가능)</h2>
+          </div>
+          <p className="text-sm text-slate-500 mb-4 leading-relaxed">
+            AI Native가 되어 달성하고자 하는 결과·기대·성과를 골라주세요.
+          </p>
+
+          <div className="grid grid-cols-2 gap-2">
+            {OUTCOME_OPTIONS.map((o) => (
+              <Chip
+                key={o.ko}
+                selected={selectedOutcomes.includes(o.ko)}
+                onClick={() => toggleOutcome(o.ko)}
               >
-                {t.ko}
-              </MiniChip>
+                {o.ko}
+              </Chip>
             ))}
           </div>
 
-          {(selectedTaskChips.length > 0 || customTask.trim()) && taskEn && (
-            <div className="mb-4 p-3 rounded-xl bg-violet-50/60 border border-violet-100">
+          {(selectedOutcomes.length > 0 || customOutcome.trim()) && aiOutcomeContextText && (
+            <div className="mt-4 p-3 rounded-xl bg-violet-50/60 border border-violet-100">
               <p className="text-xs text-violet-600 leading-relaxed break-words">
-                → {taskEn}
+                → {aiOutcomeContextText}
               </p>
             </div>
           )}
 
-          <div className="border-t border-slate-100 pt-4">
+          <div className="border-t border-slate-100 mt-5 pt-4">
             <label className="block text-sm font-bold text-slate-700 mb-2">
-              또는 직접 입력 <span className="font-medium text-slate-400">(칩과 함께 사용 가능)</span>
+              직접 추가 <span className="font-medium text-slate-400">(선택)</span>
             </label>
             <input
               type="text"
-              value={customTask}
-              onChange={(e) => setCustomTask(e.target.value)}
-              placeholder="예: Developing HBM4 advanced packaging solutions"
+              value={customOutcome}
+              onChange={(e) => setCustomOutcome(e.target.value)}
+              placeholder="예: 내가 가장 싫어했던 반복 업무가 사라진 일상"
               className="w-full rounded-2xl border-2 border-slate-200 bg-[#f6f7f9] px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-violet-400 focus:bg-violet-50/30 transition-colors"
             />
-            {customTask.trim() && hasKorean(customTask) && (
+            {customOutcome.trim() && hasKorean(customOutcome) && (
               <p className="mt-1.5 text-xs text-amber-600 font-medium">
                 한국어가 감지되었습니다. 프롬프트에 AI 자동 번역 지시가 추가됩니다.
               </p>
@@ -478,15 +509,17 @@ export default function PromptSetPage() {
           </div>
         </section>
 
-        {/* ── STEP 4: 분위기 키워드 ── */}
+        {/* ── STEP 4: 분위기 키워드 & 이미지 유형 ── */}
         <section className="rounded-3xl bg-white p-5 shadow-sm border border-black/5">
           <div className="flex items-center gap-2 mb-1">
-            <StepBadge step={4} total={5} />
-            <h2 className="text-base font-extrabold text-slate-900">분위기 키워드</h2>
+            <StepBadge step={4} total={TOTAL_STEPS} />
+            <h2 className="text-base font-extrabold text-slate-900">분위기 & 이미지 유형</h2>
           </div>
           <p className="text-sm text-slate-500 mb-4">
-            이미지 분위기를 결정하는 키워드를 선택하세요 (다중 선택 가능)
+            이미지의 분위기와 표현 스타일을 골라주세요
           </p>
+
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">분위기 키워드 (다중 선택 가능)</p>
           <div className="grid grid-cols-3 gap-2">
             {MOOD_KEYWORDS.map((m) => (
               <button
@@ -506,27 +539,23 @@ export default function PromptSetPage() {
           {selectedMoods.length > 0 && (
             <div className="mt-3 p-3 rounded-xl bg-violet-50/60 border border-violet-100">
               <p className="text-xs text-violet-600 leading-relaxed">
-                {moodsEn.join(". ")}
+                {step4Atmosphere}
               </p>
             </div>
           )}
-        </section>
 
-        {/* ── STEP 5: 이미지 유형 ── */}
-        <section className="rounded-3xl bg-white p-5 shadow-sm border border-black/5">
-          <div className="flex items-center gap-2 mb-1">
-            <StepBadge step={5} total={5} />
-            <h2 className="text-base font-extrabold text-slate-900">이미지 유형</h2>
-          </div>
-          <div className="flex flex-col gap-2 mt-3">
-            {IMAGE_TYPES.map((t) => (
-              <ImageTypeCard
-                key={t.ko}
-                item={t}
-                selected={selectedImageType === t.ko}
-                onClick={() => setSelectedImageType(t.ko)}
-              />
-            ))}
+          <div className="border-t border-slate-100 mt-5 pt-5">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">이미지 유형</p>
+            <div className="flex flex-col gap-2">
+              {IMAGE_TYPES.map((t) => (
+                <ImageTypeCard
+                  key={t.ko}
+                  item={t}
+                  selected={selectedImageType === t.ko}
+                  onClick={() => setSelectedImageType(t.ko)}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
