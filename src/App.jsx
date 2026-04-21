@@ -10,6 +10,7 @@ import {
 import Main from "./components/Main";
 import Intro from "./components/Intro";
 import Question from "./components/Question";
+import Tiebreaker from "./components/Tiebreaker";
 import Loading from "./components/Loading";
 import Result from "./components/Result";
 import OpenFeedbackForm from "./components/OpenFeedbackForm";
@@ -19,6 +20,7 @@ import { questions as allQuestions } from "./data/questions";
 import {
   INITIAL_MEMBER_SCORE,
   calculateResult,
+  applyTiebreakerPick,
 } from "./data/scoringMap";
 import { supabase } from "./supabaseClient";
 
@@ -100,6 +102,7 @@ export default function App() {
   const [draftChoice, setDraftChoice] = useState(null);
   const [memberScore, setMemberScore] = useState({ ...INITIAL_MEMBER_SCORE });
   const [resultType, setResultType] = useState(null);
+  const [pendingTiebreaker, setPendingTiebreaker] = useState(null);
 
   const [sessionId, setSessionId] = useState(() => {
     if (typeof window === "undefined") return null;
@@ -131,6 +134,9 @@ export default function App() {
     setDraftChoice(next.draftChoice ?? null);
     setMemberScore(next.memberScore ?? { ...INITIAL_MEMBER_SCORE });
     setResultType(next.resultType ?? null);
+    setPendingTiebreaker(
+      Array.isArray(next.pendingTiebreaker) ? next.pendingTiebreaker : null,
+    );
   }, []);
 
   useEffect(() => {
@@ -140,8 +146,16 @@ export default function App() {
       draftChoice,
       memberScore,
       resultType,
+      pendingTiebreaker,
     });
-  }, [answers, currentQuestionIndex, draftChoice, memberScore, resultType]);
+  }, [
+    answers,
+    currentQuestionIndex,
+    draftChoice,
+    memberScore,
+    resultType,
+    pendingTiebreaker,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -241,6 +255,7 @@ export default function App() {
     setDraftChoice(null);
     setMemberScore({ ...INITIAL_MEMBER_SCORE });
     setResultType(null);
+    setPendingTiebreaker(null);
     clearGameState();
     navigate("/guide");
   };
@@ -311,10 +326,26 @@ export default function App() {
       navigate(`/questions/${nextIndex + 1}`);
     } else {
       const result = calculateResult(score);
-      setResultType(result);
       setDraftChoice(null);
-      navigate("/loading");
+      if (result.isTied) {
+        setPendingTiebreaker(result.topSkillCandidates);
+        setResultType(null);
+        navigate("/tiebreaker");
+      } else {
+        setPendingTiebreaker(null);
+        setResultType(result);
+        navigate("/loading");
+      }
     }
+  };
+
+  const handleTiebreakerSubmit = (skillCode) => {
+    const nextScore = applyTiebreakerPick(memberScore, skillCode);
+    const result = calculateResult(nextScore, { tieResolution: "random" });
+    setMemberScore(nextScore);
+    setResultType(result);
+    setPendingTiebreaker(null);
+    navigate("/loading");
   };
 
   const handlePrevious = () => {
@@ -338,6 +369,7 @@ export default function App() {
     setDraftChoice(null);
     setMemberScore({ ...INITIAL_MEMBER_SCORE });
     setResultType(null);
+    setPendingTiebreaker(null);
     navigate("/");
   };
 
@@ -385,6 +417,19 @@ export default function App() {
             onNext={handleNext}
             onPrevious={handlePrevious}
           />
+        }
+      />
+      <Route
+        path="/tiebreaker"
+        element={
+          pendingTiebreaker && pendingTiebreaker.length > 1 ? (
+            <Tiebreaker
+              candidates={pendingTiebreaker}
+              onSubmit={handleTiebreakerSubmit}
+            />
+          ) : (
+            <Navigate to="/" replace />
+          )
         }
       />
       <Route
