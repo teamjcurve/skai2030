@@ -21,6 +21,7 @@ import {
   INITIAL_MEMBER_SCORE,
   calculateResult,
   applyTiebreakerPick,
+  selectTiebreakerCandidates,
 } from "./data/scoringMap";
 import { supabase } from "./supabaseClient";
 
@@ -328,7 +329,7 @@ export default function App() {
       const result = calculateResult(score);
       setDraftChoice(null);
       if (result.isTied) {
-        setPendingTiebreaker(result.topSkillCandidates);
+        setPendingTiebreaker(selectTiebreakerCandidates(result.topSkillCandidates));
         setResultType(null);
         navigate("/tiebreaker");
       } else {
@@ -344,7 +345,6 @@ export default function App() {
     const result = calculateResult(nextScore, { tieResolution: "random" });
     setMemberScore(nextScore);
     setResultType(result);
-    setPendingTiebreaker(null);
     navigate("/loading");
   };
 
@@ -427,6 +427,8 @@ export default function App() {
               candidates={pendingTiebreaker}
               onSubmit={handleTiebreakerSubmit}
             />
+          ) : resultType ? (
+            <Navigate to="/result" replace />
           ) : (
             <Navigate to="/" replace />
           )

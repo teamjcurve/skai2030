@@ -67,3 +67,18 @@ export function applyTiebreakerPick(memberScore, skillCode) {
   next[skillCode] = (next[skillCode] ?? 0) + 1;
   return next;
 }
+
+export const TIEBREAKER_MAX_OPTIONS = 3;
+
+export function selectTiebreakerCandidates(
+  candidates,
+  max = TIEBREAKER_MAX_OPTIONS,
+) {
+  if (!Array.isArray(candidates) || candidates.length === 0) return [];
+  const pool = [...candidates];
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.min(max, pool.length));
+}

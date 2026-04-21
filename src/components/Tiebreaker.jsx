@@ -43,7 +43,7 @@ export default function Tiebreaker({ candidates, onSubmit }) {
               {tiebreakerPrompt}
             </h2>
             <p className="mt-3 text-sm text-slate-500 leading-relaxed">
-              두 가지 이상의 강점이 동률로 나왔어요. 평소 가장 가까운 모습을
+              두 가지 이상의 스킬이 동률로 나왔어요. 평소 가장 가까운 모습을
               한 가지만 골라 주세요.
             </p>
           </div>
