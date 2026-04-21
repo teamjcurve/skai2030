@@ -104,6 +104,7 @@ export default function App() {
   const [memberScore, setMemberScore] = useState({ ...INITIAL_MEMBER_SCORE });
   const [resultType, setResultType] = useState(null);
   const [pendingTiebreaker, setPendingTiebreaker] = useState(null);
+  const [coTopSkills, setCoTopSkills] = useState([]);
 
   const [sessionId, setSessionId] = useState(() => {
     if (typeof window === "undefined") return null;
@@ -138,6 +139,7 @@ export default function App() {
     setPendingTiebreaker(
       Array.isArray(next.pendingTiebreaker) ? next.pendingTiebreaker : null,
     );
+    setCoTopSkills(Array.isArray(next.coTopSkills) ? next.coTopSkills : []);
   }, []);
 
   useEffect(() => {
@@ -148,6 +150,7 @@ export default function App() {
       memberScore,
       resultType,
       pendingTiebreaker,
+      coTopSkills,
     });
   }, [
     answers,
@@ -156,6 +159,7 @@ export default function App() {
     memberScore,
     resultType,
     pendingTiebreaker,
+    coTopSkills,
   ]);
 
   useEffect(() => {
@@ -257,6 +261,7 @@ export default function App() {
     setMemberScore({ ...INITIAL_MEMBER_SCORE });
     setResultType(null);
     setPendingTiebreaker(null);
+    setCoTopSkills([]);
     clearGameState();
     navigate("/guide");
   };
@@ -329,10 +334,12 @@ export default function App() {
       const result = calculateResult(score);
       setDraftChoice(null);
       if (result.isTied) {
+        setCoTopSkills(result.topSkillCandidates);
         setPendingTiebreaker(selectTiebreakerCandidates(result.topSkillCandidates));
         setResultType(null);
         navigate("/tiebreaker");
       } else {
+        setCoTopSkills([]);
         setPendingTiebreaker(null);
         setResultType(result);
         navigate("/loading");
@@ -370,6 +377,7 @@ export default function App() {
     setMemberScore({ ...INITIAL_MEMBER_SCORE });
     setResultType(null);
     setPendingTiebreaker(null);
+    setCoTopSkills([]);
     navigate("/");
   };
 
@@ -450,6 +458,7 @@ export default function App() {
             <Result
               resultType={resultType}
               memberScore={memberScore}
+              coTopSkills={coTopSkills}
               onRestart={handleRestart}
             />
           ) : (

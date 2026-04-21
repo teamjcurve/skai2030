@@ -56,7 +56,12 @@ function renderLeadBold(text) {
   );
 }
 
-export default function Result({ resultType, memberScore, onRestart }) {
+export default function Result({
+  resultType,
+  memberScore,
+  coTopSkills = [],
+  onRestart,
+}) {
   const captureRef = useRef(null);
 
   const resultCode = resultType?.memberResult;
@@ -72,6 +77,10 @@ export default function Result({ resultType, memberScore, onRestart }) {
 
   const top3 = ranked.slice(0, 3);
   const allCoreSkills = SKILL_CODE_ORDER.map((code) => SKILL_LABELS[code]);
+
+  const coStrengths = (coTopSkills || [])
+    .filter((code) => code && code !== resultCode && SKILL_LABELS[code])
+    .map((code) => ({ code, name: SKILL_LABELS[code] }));
 
   if (!character) return null;
 
@@ -127,6 +136,31 @@ export default function Result({ resultType, memberScore, onRestart }) {
               </p>
             </div>
           </div>
+
+          {coStrengths.length > 0 ? (
+            <div className="w-full rounded-[28px] bg-white/55 backdrop-blur-xl p-6 sm:p-7 border border-[color:var(--key-primary)]/20 shadow-[0_14px_36px_-22px_rgba(245,87,8,0.35)]">
+              <p className="text-[11px] font-extrabold text-[color:var(--key-primary)] uppercase tracking-widest mb-2">
+                함께 두드러진 스킬
+              </p>
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug mb-2">
+                메인 강점 외에도 동등하게 높았던 영역이에요
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                22문항에서 메인 스킬과 동일하게 점수가 높았던 강점입니다.
+                메인은 직접 정하셨지만, 아래 스킬도 당신의 핵심 자산이에요.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {coStrengths.map((s) => (
+                  <span
+                    key={s.code}
+                    className="inline-flex items-center px-3 py-2 rounded-full bg-white border border-[color:var(--key-primary)]/25 text-sm font-bold text-slate-800"
+                  >
+                    {s.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="w-full rounded-[28px] bg-white/40 backdrop-blur-xl p-6 sm:p-8 border border-white/55 shadow-[0_16px_40px_-24px_rgba(2,6,23,0.35)]">
             <div className="flex items-end justify-between gap-3 mb-4">

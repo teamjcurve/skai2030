@@ -21,8 +21,8 @@ export default function Tiebreaker({ candidates, onSubmit }) {
       <div className="w-full px-5 pt-6">
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between text-sm text-slate-500 mb-2">
-            <span>마지막 한 끗</span>
-            <span>거의 다 왔어요</span>
+            <span>최종 확인</span>
+            <span>22문항 완료</span>
           </div>
           <div className="w-full h-2 bg-black/10 rounded-full overflow-hidden">
             <div
@@ -37,14 +37,15 @@ export default function Tiebreaker({ candidates, onSubmit }) {
         <div className="max-w-md w-full mx-auto flex flex-col gap-4">
           <div className="rounded-3xl bg-white p-6 shadow-sm border border-black/5">
             <p className="text-sm text-slate-500 font-semibold mb-3 tracking-wide uppercase">
-              Tiebreaker
+              핵심 스킬 압축 완료
             </p>
             <h2 className="text-lg sm:text-xl font-bold leading-relaxed text-slate-900">
               {tiebreakerPrompt}
             </h2>
             <p className="mt-3 text-sm text-slate-500 leading-relaxed">
-              두 가지 이상의 스킬이 동률로 나왔어요. 평소 가장 가까운 모습을
-              한 가지만 골라 주세요.
+              아래 {options.length}개 스킬은 22문항 점수가 동등하게 높았어요.
+              모두 당신의 스킬이지만, 그중 본인의 정체성에 가장 가까운 메인 하나를
+              직접 정해 주세요.
             </p>
           </div>
 
@@ -80,7 +81,7 @@ export default function Tiebreaker({ candidates, onSubmit }) {
                 : "bg-slate-200 text-slate-400 cursor-not-allowed"
             }`}
           >
-            결과 보기
+            메인 스킬 확정
           </button>
         </div>
       </div>

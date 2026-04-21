@@ -1,5 +1,5 @@
 export const tiebreakerPrompt =
-  "마지막 한 끗! 평소 당신에게 가장 가까운 모습은 어느 쪽인가요?";
+  "22문항을 통해 당신의 핵심 스킬이 좁혀졌어요. 그중 가장 ‘나답다’고 느끼는 한 가지를 메인 스킬로 골라 주세요.";
 
 export const tiebreakerStatements = {
   resilience_agility:
@@ -19,7 +19,7 @@ export const tiebreakerStatements = {
   systems_thinking:
     "전체 흐름과 파급 효과를 먼저 그려 보고 움직인다.",
   talent_development:
-    "동료의 강점을 알아보고 함께 성장하도록 돕는다.",
+    "동료의 스킬을 알아보고 함께 성장하도록 돕는다.",
   motivation_self_awareness:
     "내가 어디로 가고 있는지 의미와 목표를 명확히 한다.",
   empathy_active_listening:
